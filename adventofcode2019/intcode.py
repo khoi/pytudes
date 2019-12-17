@@ -23,29 +23,30 @@ class IntCode:
         self.halt = False
         self.rel_base = 0
 
-    def get_value(self, mode, i):
+    def get_addr(self, mode, i):
         assert i >= 0, f"invalid address {i}"
         if mode == POSITION_MODE:
-            return self.ram[self.ram[i]]
-        elif mode == IMMEDIATE_MODE:
             return self.ram[i]
+        elif mode == IMMEDIATE_MODE:
+            return i
         elif mode == RELATIVE_MODE:
-            return self.ram[self.rel_base + self.ram[i]]
+            return self.rel_base + self.ram[i]
         else:
             raise Exception(f"unsupported mode {mode}")
 
     def run(self, inputs):
-        input_pointer = 0
         outputs = []
+        input_pointer = 0
         while self.ram[self.pointer] != HALT:
             instruction = self.ram[self.pointer]
             opcode = instruction % 100
             mode1 = (instruction // 100) % 10
             mode2 = (instruction // 1000) % 10
-            a = self.get_value(mode1, self.pointer + 1)
-            b = self.get_value(mode2, self.pointer + 2)
-            if opcode == ADD:
-                self.ram[self.ram[self.pointer + 3]] = a + b
+            a = self.ram[self.get_addr(mode1, self.pointer + 1)]
+            b = self.ram[self.get_addr(mode2, self.pointer + 2)]
+            if opcode == ADD or opcode == MULT:
+                f = {ADD: int.__add__, MULT: int.__mul__}
+                self.ram[self.ram[self.pointer + 3]] = f[opcode](a, b)
                 self.pointer += 4
             elif opcode == MULT:
                 self.ram[self.ram[self.pointer + 3]] = a * b
@@ -53,11 +54,11 @@ class IntCode:
             elif opcode == INPUT:
                 if input_pointer > len(inputs) - 1:
                     return outputs  # waiting for input
-                self.ram[self.ram[self.pointer + 1]] = inputs[input_pointer]
+                self.ram[self.get_addr(mode1, self.pointer + 1)] = inputs[input_pointer]
                 input_pointer += 1
                 self.pointer += 2
             elif opcode == OUTPUT:
-                outputs.append(self.get_value(mode1, self.pointer + 1))
+                outputs.append(self.ram[self.get_addr(mode1, self.pointer + 1)])
                 self.pointer += 2
             elif opcode == JUMP_TRUE:
                 self.pointer = b if a != 0 else self.pointer + 3
