@@ -9,7 +9,7 @@ def fuel2(mass):
     return res + fuel2(res)
 
 
-f = open("day1.txt")
+f = open("inputs/day1.txt")
 masses = [int(v) for v in f.read().splitlines()]
 
 print(sum([fuel(x) for x in masses]))

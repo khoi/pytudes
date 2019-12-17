@@ -1,6 +1,6 @@
 import numpy as np
 
-input_file = open("day8.txt")
+input_file = open("inputs/day8.txt")
 lines = input_file.read().splitlines()
 rawInput = lines[0]
 

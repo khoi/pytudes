@@ -1,6 +1,6 @@
 import os
 
-f = open("day2.txt")
+f = open("inputs/day2.txt")
 inputs = [int(code) for code in f.read().split(",")]
 
 

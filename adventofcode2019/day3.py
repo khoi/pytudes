@@ -1,4 +1,4 @@
-f = open("day3.txt")
+f = open("inputs/day3.txt")
 inputs = f.read().splitlines()
 first = inputs[0].split(",")
 second = inputs[1].split(",")

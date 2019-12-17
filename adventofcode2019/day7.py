@@ -1,7 +1,7 @@
 from intcode import IntCode
 import itertools
 
-input_file = open("day7.txt")
+input_file = open("inputs/day7.txt")
 lines = input_file.read().splitlines()
 instruction = [int(i) for i in lines[0].split(",")]
 
