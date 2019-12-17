@@ -42,36 +42,36 @@ class IntCode:
             opcode = instruction % 100
             mode1 = (instruction // 100) % 10
             mode2 = (instruction // 1000) % 10
-            a = self.ram[self.get_addr(mode1, self.pointer + 1)]
-            b = self.ram[self.get_addr(mode2, self.pointer + 2)]
+            param1_addr = self.get_addr(mode1, self.pointer + 1)
+            param2_addr = self.get_addr(mode2, self.pointer + 2)
             if opcode == ADD or opcode == MULT:
                 f = {ADD: int.__add__, MULT: int.__mul__}
-                self.ram[self.ram[self.pointer + 3]] = f[opcode](a, b)
+                self.ram[self.ram[self.pointer + 3]] = f[opcode](self.ram[param1_addr], self.ram[param2_addr])
                 self.pointer += 4
             elif opcode == MULT:
-                self.ram[self.ram[self.pointer + 3]] = a * b
+                self.ram[self.ram[self.pointer + 3]] = self.ram[param1_addr] * self.ram[param2_addr]
                 self.pointer += 4
             elif opcode == INPUT:
                 if input_pointer > len(inputs) - 1:
                     return outputs  # waiting for input
-                self.ram[self.get_addr(mode1, self.pointer + 1)] = inputs[input_pointer]
+                self.ram[param1_addr] = inputs[input_pointer]
                 input_pointer += 1
                 self.pointer += 2
             elif opcode == OUTPUT:
-                outputs.append(self.ram[self.get_addr(mode1, self.pointer + 1)])
+                outputs.append(self.ram[param1_addr])
                 self.pointer += 2
             elif opcode == JUMP_TRUE:
-                self.pointer = b if a != 0 else self.pointer + 3
+                self.pointer = self.ram[param2_addr] if self.ram[param1_addr] != 0 else self.pointer + 3
             elif opcode == JUMP_FALSE:
-                self.pointer = b if a == 0 else self.pointer + 3
+                self.pointer = self.ram[param2_addr] if self.ram[param1_addr] == 0 else self.pointer + 3
             elif opcode == LESS_THAN:
-                self.ram[self.ram[self.pointer + 3]] = 1 if a < b else 0
+                self.ram[self.ram[self.pointer + 3]] = 1 if self.ram[param1_addr] < self.ram[param2_addr] else 0
                 self.pointer += 4
             elif opcode == EQUALS:
-                self.ram[self.ram[self.pointer + 3]] = 1 if a == b else 0
+                self.ram[self.ram[self.pointer + 3]] = 1 if self.ram[param1_addr] == self.ram[param2_addr] else 0
                 self.pointer += 4
             elif opcode == ADJUST_RELATIVE_BASE:
-                self.rel_base += a
+                self.rel_base += self.ram[param1_addr]
                 self.pointer += 2
             else:
                 raise Exception(f"unsupported opcode {opcode}")
