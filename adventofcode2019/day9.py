@@ -5,5 +5,5 @@ lines = input_file.read().splitlines()
 
 boost_program = [int(i) for i in lines[0].split(",")]
 
-comp = IntCode(boost_program)
-print(comp.run([1]))
+print(IntCode(boost_program).run([1]))
+print(IntCode(boost_program).run([2]))
