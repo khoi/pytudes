@@ -50,11 +50,9 @@ class IntCode:
                 self.get_addr(modes[1], self.pointer + 2),
                 self.get_addr(modes[2], self.pointer + 3)
             )
-            if opcode == ADD:
-                self.ram[param_addrs[2]] = self.ram[param_addrs[0]] + self.ram[param_addrs[1]]
-                self.pointer += 4
-            elif opcode == MULT:
-                self.ram[param_addrs[2]] = self.ram[param_addrs[0]] * self.ram[param_addrs[1]]
+            if opcode == ADD or opcode == MULT:
+                f = {ADD: int.__add__, MULT: int.__mul__}
+                self.ram[param_addrs[2]] = f[opcode](self.ram[param_addrs[0]], self.ram[param_addrs[1]])
                 self.pointer += 4
             elif opcode == INPUT:
                 if input_pointer > len(inputs) - 1:
