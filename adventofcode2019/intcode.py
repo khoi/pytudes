@@ -1,4 +1,3 @@
-## IntCode
 HALT = 99
 ADD = 1
 MULT = 2
@@ -16,9 +15,8 @@ RELATIVE_MODE = 2
 
 
 class IntCode:
-    def __init__(self, programs, mem_capacity=4096):
-        self.ram = [0] * mem_capacity
-        self.ram[0: len(programs)] = programs
+    def __init__(self, programs, mem_capacity=0x1000):
+        self.ram = programs + [0] * mem_capacity
         self.pointer = 0
         self.halt = False
         self.rel_base = 0
@@ -39,45 +37,59 @@ class IntCode:
         input_pointer = 0
         while self.ram[self.pointer] != HALT:
             instruction = self.ram[self.pointer]
-            opcode = instruction % 100
-            modes = (
-                (instruction // 100) % 10,
-                (instruction // 1000) % 10,
-                (instruction // 10000) % 10
-            )
-            param_addrs = (
-                self.get_addr(modes[0], self.pointer + 1),
-                self.get_addr(modes[1], self.pointer + 2),
-                self.get_addr(modes[2], self.pointer + 3)
-            )
-            if opcode == ADD or opcode == MULT:
+            op = instruction % 100
+
+            def address_param_idx(i):
+                return self.get_addr(
+                    instruction // (100 * (10 ** i)) % 10, self.pointer + i + 1
+                )
+
+            if op == ADD or op == MULT:
                 f = {ADD: int.__add__, MULT: int.__mul__}
-                self.ram[param_addrs[2]] = f[opcode](self.ram[param_addrs[0]], self.ram[param_addrs[1]])
+                self.ram[address_param_idx(2)] = f[op](
+                    self.ram[address_param_idx(0)], self.ram[address_param_idx(1)]
+                )
                 self.pointer += 4
-            elif opcode == INPUT:
+            elif op == INPUT:
                 if input_pointer > len(inputs) - 1:
                     return outputs  # waiting for input
-                self.ram[param_addrs[0]] = inputs[input_pointer]
+                self.ram[address_param_idx(0)] = inputs[input_pointer]
                 input_pointer += 1
                 self.pointer += 2
-            elif opcode == OUTPUT:
-                outputs.append(self.ram[param_addrs[0]])
+            elif op == OUTPUT:
+                outputs.append(self.ram[address_param_idx(0)])
                 self.pointer += 2
-            elif opcode == JUMP_TRUE:
-                self.pointer = self.ram[param_addrs[1]] if self.ram[param_addrs[0]] != 0 else (self.pointer + 3)
-            elif opcode == JUMP_FALSE:
-                self.pointer = self.ram[param_addrs[1]] if self.ram[param_addrs[0]] == 0 else self.pointer + 3
-            elif opcode == LESS_THAN:
-                self.ram[param_addrs[2]] = 1 if self.ram[param_addrs[0]] < self.ram[param_addrs[1]] else 0
+            elif op == JUMP_TRUE:
+                self.pointer = (
+                    self.ram[address_param_idx(1)]
+                    if self.ram[address_param_idx(0)] != 0
+                    else (self.pointer + 3)
+                )
+            elif op == JUMP_FALSE:
+                self.pointer = (
+                    self.ram[address_param_idx(1)]
+                    if self.ram[address_param_idx(0)] == 0
+                    else self.pointer + 3
+                )
+            elif op == LESS_THAN:
+                self.ram[address_param_idx(2)] = (
+                    1
+                    if self.ram[address_param_idx(0)] < self.ram[address_param_idx(1)]
+                    else 0
+                )
                 self.pointer += 4
-            elif opcode == EQUALS:
-                self.ram[param_addrs[2]] = 1 if self.ram[param_addrs[0]] == self.ram[param_addrs[1]] else 0
+            elif op == EQUALS:
+                self.ram[address_param_idx(2)] = (
+                    1
+                    if self.ram[address_param_idx(0)] == self.ram[address_param_idx(1)]
+                    else 0
+                )
                 self.pointer += 4
-            elif opcode == ADJUST_RELATIVE_BASE:
-                self.rel_base += self.ram[param_addrs[0]]
+            elif op == ADJUST_RELATIVE_BASE:
+                self.rel_base += self.ram[address_param_idx(0)]
                 self.pointer += 2
             else:
-                raise Exception(f"unsupported opcode {opcode}")
+                raise Exception(f"unsupported op  {op}")
         self.halt = True
         return outputs
 
