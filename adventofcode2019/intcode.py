@@ -16,7 +16,7 @@ RELATIVE_MODE = 2
 
 
 class IntCode:
-    def __init__(self, programs, mem_capacity=1024):
+    def __init__(self, programs, mem_capacity=4096):
         self.ram = [0] * mem_capacity
         self.ram[0: len(programs)] = programs
         self.pointer = 0
