@@ -69,7 +69,7 @@ max_x = max([p.x for p in grid])
 for y in range(min_y, max_y + 1):
     for x in range(min_x, max_x + 1):
         if grid[Point(x, y)] == 1:
-            print(" # ", end="")
+            print(" o ", end="")
         else:
-            print(" . ", end="")
+            print("   ", end="")
     print()
