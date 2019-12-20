@@ -44,4 +44,32 @@ while not c.halt:
     curr_dir = next_dir(curr_dir, output_dir)
     curr_pos = next_pos(curr_pos, curr_dir)
 
+print("part 1")
 print(len(grid))
+
+print("part 2")
+
+grid = defaultdict(lambda: 0)
+c = IntCode(program)
+curr_pos = Point(0, 0)
+curr_dir = 0
+grid[curr_pos] = 1
+
+while not c.halt:
+    output_paint, output_dir = c.run([grid[curr_pos]])
+    grid[curr_pos] = output_paint
+    curr_dir = next_dir(curr_dir, output_dir)
+    curr_pos = next_pos(curr_pos, curr_dir)
+
+min_y = min([p.y for p in grid])
+max_y = max([p.y for p in grid])
+min_x = min([p.x for p in grid])
+max_x = max([p.x for p in grid])
+
+for y in range(min_y, max_y + 1):
+    for x in range(min_x, max_x + 1):
+        if grid[Point(x, y)] == 1:
+            print(" # ", end="")
+        else:
+            print(" . ", end="")
+    print()
