@@ -42,14 +42,25 @@ def traverse_postorder(root, f):
     traverse_postorder(root.right, f)
     f(root.val)
 
+def search(root, val):
+    if root is None or root.val == val:
+        return root
+    
+    if val < root.val:
+        return search(root.left, val)
+
+    return search(root.right, val)
+
 
 if __name__ == "__main__":
     #                   8
     #           3               10
     #     1           6               14
     #               4   7           13
+
+    values = [3, 1, 6, 4, 7, 10, 14, 13]
     root = Node(8)
-    for v in [3, 1, 6, 4, 7, 10, 14, 13]:
+    for v in values:
         insert(root, v)
 
     in_order = []
@@ -61,4 +72,11 @@ if __name__ == "__main__":
 
     post_order = [1, 4, 7, 6, 3, 13, 14, 10, 8]
     traverse_postorder(root, post_order.append)
-    print("SD")
+
+    assert search(root, 8) is not None
+    for v in values:
+        assert(search(root, v)) is not None
+
+    assert search(root, 9) is None
+
+    print("Tests passed.")
