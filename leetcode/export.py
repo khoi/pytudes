@@ -14,7 +14,8 @@ COOKIES = open('cookies.txt', 'r').read().strip().replace('cookie: ', '', 1)
 # Change output dir if you like
 LEETCODE_DIR = './'
 # Change how many days to look back
-DAYS_TO_IMPORT = 365*100
+# DAYS_TO_IMPORT = 365*100
+DAYS_TO_IMPORT = 1
 SUBMISSIONS_URL = 'https://leetcode.com/api/submissions/?offset={}&limit={}'
 PROBLEM_URL = 'https://leetcode.com/problems/{}/'
 GRAPHQL_URL = 'https://leetcode.com/graphql'
