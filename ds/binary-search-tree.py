@@ -55,7 +55,7 @@ def search(root, val):
 
 def height(root):
     if root is None:
-        return 0
+        return -1
     return 1 + max(height(root.left), height(root.right))
 
 
@@ -120,7 +120,7 @@ if __name__ == "__main__":
         assert (search(root, v)) is not None
 
     assert search(root, 9) is None
-    assert height(root) == 4
+    assert height(root) == 3
     assert smallest(root) == 1
     
     remove(root, 6)
@@ -128,5 +128,4 @@ if __name__ == "__main__":
     traverse_inorder(root, in_order.append)
     assert in_order == [1, 3, 4, 7, 8, 10, 13, 14]
 
-    print(smallest(root))
     print("Tests passed.")
