@@ -42,14 +42,33 @@ def traverse_postorder(root, f):
     traverse_postorder(root.right, f)
     f(root.val)
 
+
 def search(root, val):
     if root is None or root.val == val:
         return root
-    
+
     if val < root.val:
         return search(root.left, val)
 
     return search(root.right, val)
+
+
+def height(root):
+    if root is None:
+        return 0
+    return 1 + max(height(root.left), height(root.right))
+
+
+def diagram(node, top="", root="", bottom=""):
+    if node is None:
+        return f"{root}nil\n"
+    if node.left is None and node.right is None:
+        return f"{root}{node.val}\n"
+    return (
+        diagram(node.right, top + " ", top + "┌──", top + "| ")
+        + f"{root}{node.val}\n"
+        + diagram(node.left, bottom + "│ ", bottom + "└──", bottom + " ")
+    )
 
 
 if __name__ == "__main__":
@@ -62,6 +81,7 @@ if __name__ == "__main__":
     root = Node(8)
     for v in values:
         insert(root, v)
+    print(diagram(root))
 
     in_order = []
     traverse_inorder(root, in_order.append)
@@ -75,8 +95,10 @@ if __name__ == "__main__":
 
     assert search(root, 8) is not None
     for v in values:
-        assert(search(root, v)) is not None
+        assert (search(root, v)) is not None
 
     assert search(root, 9) is None
+    assert height(root) == 4
+
 
     print("Tests passed.")
