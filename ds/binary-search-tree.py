@@ -1,18 +1,18 @@
 class Node:
-    def __init__(self, val):
-        self.val = val
+    def __init__(self, key):
+        self.key = key
         self.left = None
         self.right = None
 
 
-def insert(root, val):
+def insert(root, key):
     if root is None:
-        root = Node(val)
+        root = Node(key)
         return root
-    if val < root.val:
-        root.left = insert(root.left, val)
+    if key < root.key:
+        root.left = insert(root.left, key)
     else:
-        root.right = insert(root.right, val)
+        root.right = insert(root.right, key)
     return root
 
 
@@ -21,7 +21,7 @@ def traverse_inorder(root, f):
         return
 
     traverse_inorder(root.left, f)
-    f(root.val)
+    f(root.key)
     traverse_inorder(root.right, f)
 
 
@@ -29,7 +29,7 @@ def traverse_preorder(root, f):
     if root is None:
         return
 
-    f(root.val)
+    f(root.key)
     traverse_preorder(root.left, f)
     traverse_preorder(root.right, f)
 
@@ -40,17 +40,17 @@ def traverse_postorder(root, f):
 
     traverse_postorder(root.left, f)
     traverse_postorder(root.right, f)
-    f(root.val)
+    f(root.key)
 
 
-def search(root, val):
-    if root is None or root.val == val:
+def search(root, key):
+    if root is None or root.key == key:
         return root
 
-    if val < root.val:
-        return search(root.left, val)
+    if key < root.key:
+        return search(root.left, key)
 
-    return search(root.right, val)
+    return search(root.right, key)
 
 
 def height(root):
@@ -63,35 +63,38 @@ def diagram(node, top="", root="", bottom=""):
     if node is None:
         return f"{root}nil\n"
     if node.left is None and node.right is None:
-        return f"{root}{node.val}\n"
+        return f"{root}{node.key}\n"
     return (
-        diagram(node.right, top + " ", top + "┌──", top + "| ")
-        + f"{root}{node.val}\n"
-        + diagram(node.left, bottom + "│ ", bottom + "└──", bottom + " ")
+            diagram(node.right, top + " ", top + "┌──", top + "| ")
+            + f"{root}{node.key}\n"
+            + diagram(node.left, bottom + "│ ", bottom + "└──", bottom + " ")
     )
+
 
 def smallest(node):
     if node is None:
         return None
     if node.left is None:
-        return node.val
+        return node.key
     return smallest(node.left)
 
-def remove(node, val):
+
+def remove(node, key):
     if node is None:
         return None
-    if node.val == val:
+    if node.key == key:
         if node.left is None and node.right is None:
             return None
         if node.left is None:
             return node.right
         if node.right is None:
             return node.left
-        node.val = smallest(node.right)
-        node.right = remove(node.right, node.val)
-    elif val < node.val:
-        return remove(node.left, val)
-    return remove(node.right, val)
+        node.key = smallest(node.right)
+        node.right = remove(node.right, node.key)
+    elif key < node.key:
+        return remove(node.left, key)
+    return remove(node.right, key)
+
 
 if __name__ == "__main__":
     #                   8
@@ -122,7 +125,7 @@ if __name__ == "__main__":
     assert search(root, 9) is None
     assert height(root) == 3
     assert smallest(root) == 1
-    
+
     remove(root, 6)
     in_order = []
     traverse_inorder(root, in_order.append)
