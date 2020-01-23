@@ -70,6 +70,28 @@ def diagram(node, top="", root="", bottom=""):
         + diagram(node.left, bottom + "│ ", bottom + "└──", bottom + " ")
     )
 
+def smallest(node):
+    if node is None:
+        return None
+    if node.left is None:
+        return node.val
+    return smallest(node.left)
+
+def remove(node, val):
+    if node is None:
+        return None
+    if node.val == val:
+        if node.left is None and node.right is None:
+            return None
+        if node.left is None:
+            return node.right
+        if node.right is None:
+            return node.left
+        node.val = smallest(node.right)
+        node.right = remove(node.right, node.val)
+    elif val < node.val:
+        return remove(node.left, val)
+    return remove(node.right, val)
 
 if __name__ == "__main__":
     #                   8
@@ -99,6 +121,12 @@ if __name__ == "__main__":
 
     assert search(root, 9) is None
     assert height(root) == 4
+    assert smallest(root) == 1
+    
+    remove(root, 6)
+    in_order = []
+    traverse_inorder(root, in_order.append)
+    assert in_order == [1, 3, 4, 7, 8, 10, 13, 14]
 
-
+    print(smallest(root))
     print("Tests passed.")
