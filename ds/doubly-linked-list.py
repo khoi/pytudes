@@ -46,7 +46,6 @@ class LinkedList:
             newNode.next = self.head
         self.head = newNode
 
-
 if __name__ == "__main__":
     ll = LinkedList()
 
@@ -58,8 +57,8 @@ if __name__ == "__main__":
     ll.append(1)
     assert ll.is_empty == False
     assert len(ll) == 1
-    assert ll.head.value is 1
-    assert ll.tail.value is 1
+    assert ll.head.value == 1
+    assert ll.tail.value == 1
 
     for v in [2,3,4,5]:
         ll.append(v)
