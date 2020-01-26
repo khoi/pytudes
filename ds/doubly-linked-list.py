@@ -11,6 +11,9 @@ class LinkedList:
     def __init__(self):
         self.head = None
 
+    def __bool__(self):
+        return self.head is not None
+
     @property
     def is_empty(self):
         return not self.head
@@ -53,12 +56,14 @@ if __name__ == "__main__":
     assert len(ll) == 0
     assert ll.head is None
     assert ll.tail is None
+    assert not ll # test __bool__
 
     ll.append(1)
     assert ll.is_empty == False
     assert len(ll) == 1
     assert ll.head.value == 1
     assert ll.tail.value == 1
+    assert ll # test __bool__
 
     for v in [2,3,4,5]:
         ll.append(v)
