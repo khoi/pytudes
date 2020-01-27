@@ -1,11 +1,11 @@
 class Node:
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, data):
+        self.data = data
         self.next = None
         self.previous = None
 
     def __str__(self):
-        return str(self.value)
+        return str(self.data)
 
 
 class LinkedList:
@@ -34,7 +34,7 @@ class LinkedList:
             current = current.next
         return count
 
-    def __node(self, index):
+    def get_node(self, index):
         current = self.head
         count = 0
         while current:
@@ -45,25 +45,31 @@ class LinkedList:
         raise Exception("index out of bounds")
     
     def __getitem__(self, key):
-        return self.__node(key).value
+        return self.get_node(key).data
+
+    def insert_node(self, node, index):
+        if index == 0:
+            node.next = self.head
+            node.previous = None
+            if self.head:
+                self.head.previous = node
+            self.head = node
+        else:
+            previous_node = self.get_node(index - 1)
+            next_node = previous_node.next
+            node.previous = previous_node
+            node.next = next_node
+            if next_node:
+                next_node.previous = node
+            previous_node.next = node
 
     def append(self, value):
-        newNode = Node(value)
-        tail = self.tail
-        if tail:
-            newNode.previous = tail
-            tail.next = newNode
-        else:
-            self.head = newNode
+        self.insert_node(Node(value), len(self))
 
     def prepend(self, value):
-        newNode = Node(value)
-        if self.head:
-            self.head.previous = newNode
-            newNode.next = self.head
-        self.head = newNode
+        self.insert_node(Node(value), 0)
 
-    def __remove(self, node):
+    def removeNode(self, node):
         previous = node.previous
         next = node.next 
         if previous:
@@ -75,8 +81,8 @@ class LinkedList:
         return node
 
     def remove(self, index):
-        node = self.__node(index)
-        return self.__remove(node).value
+        node = self.get_node(index)
+        return self.removeNode(node).data
 
 
 if __name__ == "__main__":
@@ -91,8 +97,8 @@ if __name__ == "__main__":
     ll.append(0)
     assert ll.is_empty == False
     assert len(ll) == 1
-    assert ll.head.value == 0
-    assert ll.tail.value == 0
+    assert ll.head.data == 0
+    assert ll.tail.data == 0
     assert ll  # test __bool__
     assert ll[0] == 0
 
@@ -100,15 +106,15 @@ if __name__ == "__main__":
         ll.append(v)
 
     assert len(ll) == 6
-    assert ll.head.value == 0
-    assert ll.tail.value == 5
+    assert ll.head.data == 0
+    assert ll.tail.data == 5
     for i in range(0, 6):
         assert ll[i] == i
 
     ll.prepend(-1)
     assert len(ll) == 7
-    assert ll.head.value == -1 
-    assert ll.tail.value == 5
+    assert ll.head.data == -1 
+    assert ll.tail.data == 5
     print("Doubly test passed")
 
     assert ll.remove(0) == -1 # remaining: [0, 1, 2, 3, 4, 5]
