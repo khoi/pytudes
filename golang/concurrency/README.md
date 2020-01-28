@@ -13,7 +13,7 @@ a pipeline is a series of stages connected by channels, where each stage is a gr
 
 ```
 
-See: [./pipeline/main.go](./pipeline/main.go)
+See: [./pipeline.go](./pipeline.go)
 
 ## Fan-out, Fan-in
 
@@ -23,7 +23,7 @@ Multiple functions can read from the same channel until that channel is closed; 
 A function can read from multiple inputs and proceed until all are closed by multiplexing the input channels onto a single channel that's closed when all the inputs are closed. This is called fan-in.
 ```
 
-See: [./fan/main.go](./fan/main.go)
+See: [./fanout.go](./fanout.go)
 
 ## Explicit Cancellation
 
@@ -38,4 +38,4 @@ stages keep receiving values from inbound channels until those channels are clos
 Pipelines unblock senders either by ensuring there's enough buffer for all the values that are sent or by explicitly signalling senders when the receiver may abandon the channel.
 ```
 
-See: [./cancellation/main.go](./cancellation/main.go)
+See: [./cancellation.go](./cancellation.go)
