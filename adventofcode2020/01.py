@@ -18,5 +18,5 @@ def prod_of_3_pairs_that_sum_to_a_target(s, target):
 f = open("inputs/01.txt")
 numbers = set([int(v) for v in f.read().splitlines()])
 
-# print(prod_of_two_pairs_that_sum_to_a_target(numbers, 2020))
+print(prod_of_two_pairs_that_sum_to_a_target(numbers, 2020))
 print(prod_of_3_pairs_that_sum_to_a_target(numbers, 2020))
