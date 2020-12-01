@@ -1,4 +1,3 @@
-
 def prod_of_two_pairs_that_sum_to_a_target(s, target):
     for v in s:
         d = target - v
