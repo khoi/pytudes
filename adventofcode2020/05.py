@@ -37,11 +37,7 @@ if __name__ == "__main__":
     all_ids = set([seat[2] for seat in all_seats])
     print(max(all_ids))
 
-    all_possible_ids = set()
-    for row in range(0, 128):
-        for col in range(0, 8):
-            all_possible_ids.add(row * 8 + col)
-
+    all_possible_ids = set([row * 8 + col for row in range(0, 128) for col in range(0, 8)])
     missing_ids = all_possible_ids - all_ids
 
     for i in missing_ids:
