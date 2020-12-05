@@ -1,4 +1,5 @@
 from math import ceil, floor
+import itertools
 
 def find(code, up, down, lower_bound, upper_bound):
     r = [lower_bound, upper_bound]
@@ -29,5 +30,17 @@ if __name__ == "__main__":
     assert(find_seat('FFFBBBFRRR') == (14, 7, 119))
     assert(find_seat('BBFFBBFRLL') == (102, 4, 820))
 
-    print(max([find_seat(l)[2] for l in lines]))
+    all_seats = [find_seat(l) for l in lines]
+    all_ids = set([seat[2] for seat in all_seats])
+    print(max(all_ids))
 
+    all_possible_ids = set()
+    for row in range(0, 128):
+        for col in range(0, 8):
+            all_possible_ids.add(row * 8 + col) 
+
+    missing_ids = all_possible_ids - all_ids
+
+    for i in missing_ids:
+        if i - 1 in all_ids and i + 1 in all_ids:
+            print(i)
