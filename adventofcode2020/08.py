@@ -19,19 +19,18 @@ def compute(instructions):
 
 
 def find_broken_instructions(instructions):
-    nop_indices = [i for i, x in enumerate(instructions) if x[:3] == "nop"]
-    jmp_indices = [i for i, x in enumerate(instructions) if x[:3] == "jmp"]
+    swap_indices = [
+        i for i, x in enumerate(instructions) if x[:3] == "nop" or x[:3] == "jmp"
+    ]
 
-    for noop_idx in nop_indices:
+    for idx in swap_indices:
         new_instructions = instructions.copy()
-        new_instructions[noop_idx] = new_instructions[noop_idx].replace("nop", "jmp")
-        res = compute(new_instructions)
-        if res[1] == True:
-            return res
+        swapping_opcode = new_instructions[idx][:3]
+        if swapping_opcode == "nop":
+            new_instructions[idx] = new_instructions[idx].replace("nop", "jmp")
+        elif swapping_opcode == "jmp":
+            new_instructions[idx] = new_instructions[idx].replace("jmp", "nop")
 
-    for jmp_idx in jmp_indices:
-        new_instructions = instructions.copy()
-        new_instructions[jmp_idx] = new_instructions[jmp_idx].replace("jmp", "nop")
         res = compute(new_instructions)
         if res[1] == True:
             return res
