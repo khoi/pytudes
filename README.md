@@ -1,3 +1,5 @@
 # pytudes
 
-This project contains my personal `pytudes` - short Python programs to practice programming skills. 
+Programming this and that
+
+- [Advent of Code 2022](./aoc2022)
