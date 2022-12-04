@@ -7,7 +7,7 @@ fn parse(input: &str) -> Input {
 }
 
 fn score_char(code: u8) -> u8 {
-    code % 32 + 26 * if code <= 90 { 1 } else { 0 }
+    code % 32 + if code <= 90 { 26 } else { 0 }
 }
 
 pub fn part1(input: &Input) -> u32 {
