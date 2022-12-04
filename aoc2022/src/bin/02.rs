@@ -33,3 +33,25 @@ fn main() {
     println!("{}", part1(&input));
     println!("{}", part2(&input));
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    static INPUT: &str = "A Y
+B X
+C Z
+";
+
+    #[test]
+    fn test_1() {
+        let result = part1(&parse(INPUT));
+        assert_eq!(result, 15);
+    }
+
+    #[test]
+    fn test_2() {
+        let result = part2(&parse(INPUT));
+        assert_eq!(result, 12);
+    }
+}
