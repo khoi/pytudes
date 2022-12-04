@@ -1,33 +1,35 @@
 use aoc2022::read_file_input;
 
-fn main() {
-    let input = read_file_input(02);
+type Input = Vec<(u64, u64)>;
 
-    let matches: Vec<(u8, u8)> = input
+fn parse(input: &str) -> Input {
+    input
         .lines()
-        .map(|line| {
-            let mut iter = line.split_whitespace();
-            (
-                iter.next().unwrap().as_bytes().first().unwrap() - 64,
-                iter.next().unwrap().as_bytes().first().unwrap() - 87,
-            )
+        .filter_map(|l| {
+            let bytes = l.as_bytes();
+            Some(((bytes.first()? - 64) as u64, (bytes.last()? - 87) as u64))
         })
-        .collect();
+        .collect()
+}
 
-    let p1 = matches
+fn part1(input: &Input) -> u64 {
+    input.iter().map(|(a, b)| score(*a, *b)).sum()
+}
+
+fn part2(input: &Input) -> u64 {
+    input
         .iter()
-        .map(|m| score(m.0 as u64, m.1 as u64))
-        .sum::<u64>();
-
-    let p2 = matches
-        .iter()
-        .map(|m| score(m.0 as u64, (1 + (m.1 + m.0) % 3) as u64))
-        .sum::<u64>();
-
-    println!("{}", p1);
-    println!("{}", p2);
+        .map(|(a, b)| score(*a, (1 + (*b + *a) % 3) as u64))
+        .sum()
 }
 
 fn score(left: u64, right: u64) -> u64 {
     (4 + right - left) % 3 * 3 + right
+}
+
+fn main() {
+    let input = parse(&read_file_input(02));
+
+    println!("{}", part1(&input));
+    println!("{}", part2(&input));
 }
