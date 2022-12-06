@@ -1,47 +1,43 @@
 use aoc2022::read_file_input;
 use regex::Regex;
 
-type Input = u64;
-
-#[derive(Debug)]
-struct Procedure {
-    count: u64,
-    from: u64,
-    to: u64,
-}
+type Stacks = Vec<Vec<char>>;
+type Procedure = (usize, usize, usize);
+type Input = (Stacks, Vec<Procedure>);
 
 fn parse(input: &str) -> Input {
-    let lines: Vec<&str> = input.lines().collect();
+    let (stack_str, procedure_str) = input.split_once("\n\n").unwrap();
 
-    let mut empty_line_index = 0;
+    let mut stack_iter = stack_str.lines().rev();
 
-    for (i, line) in lines.iter().enumerate() {
-        if line.trim().is_empty() {
-            empty_line_index = i;
-            break;
-        }
+    let mut stack = vec![vec![]; stack_iter.next().unwrap().split_whitespace().count()];
+
+    for line in stack_iter {
+        line.chars().skip(1).enumerate().for_each(|(i, c)| {
+            if i % 4 == 0 && c != ' ' {
+                stack[i / 4].push(c);
+            }
+        });
     }
 
     let procedure_regex = Regex::new(r"(?m)move\s(\d+)\sfrom\s(\d+)\sto\s(\d+)").unwrap();
-    let procedure_str = lines
-        .into_iter()
-        .skip(empty_line_index + 1)
-        .collect::<Vec<&str>>()
-        .join(" ");
 
     let procedures: Vec<Procedure> = procedure_regex
-        .captures_iter(&procedure_str)
-        .map(|cap| {
-            let count = cap[1].parse::<u64>().unwrap();
-            let from = cap[2].parse::<u64>().unwrap();
-            let to = cap[3].parse::<u64>().unwrap();
-            Procedure { count, from, to }
+        .captures_iter(procedure_str)
+        .filter_map(|cap| {
+            Some((
+                cap[1].parse().ok()?,
+                cap[2].parse().ok()?,
+                cap[3].parse().ok()?,
+            ))
         })
         .collect();
 
-    println!("{:?}", procedures);
-    println!("{:?}", empty_line_index);
-    0
+    (stack, procedures)
+}
+
+fn get_top_row(stack: &Stacks) -> Option<char> {
+    Some(stack.iter().max_by_key(|v| v.len())?.last()?.clone())
 }
 
 pub fn part1(input: &Input) -> char {
@@ -55,4 +51,5 @@ pub fn part2(input: &Input) -> char {
 fn main() {
     let input = read_file_input(05);
     let parsed = parse(&input);
+    println!("{}", get_top_row(&parsed.0).unwrap());
 }
