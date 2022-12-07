@@ -36,20 +36,37 @@ fn parse(input: &str) -> Input {
     (stack, procedures)
 }
 
-fn get_top_row(stack: &Stacks) -> Option<char> {
-    Some(stack.iter().max_by_key(|v| v.len())?.last()?.clone())
+fn get_top_row(stack: &Stacks) -> String {
+    stack.iter().filter_map(|m| m.last()).collect::<String>()
 }
 
-pub fn part1(input: &Input) -> char {
-    'A'
+fn process(stacks: &mut Stacks, procedures: &[Procedure], multiple_mover: bool) {
+    for (amount, from, to) in procedures {
+        let origin = &mut stacks[*from - 1];
+        let crates = origin.split_off(origin.len() - amount);
+        if multiple_mover {
+            stacks[*to - 1].extend(crates.iter());
+        } else {
+            stacks[*to - 1].extend(crates.iter().rev());
+        }
+    }
 }
 
-pub fn part2(input: &Input) -> char {
-    'B'
+pub fn part1(input: Input) -> String {
+    let (mut stacks, procedures) = input;
+    process(&mut stacks, &procedures, false);
+    get_top_row(&stacks)
+}
+
+pub fn part2(input: Input) -> String {
+    let (mut stacks, procedures) = input;
+    process(&mut stacks, &procedures, true);
+    get_top_row(&stacks)
 }
 
 fn main() {
     let input = read_file_input(05);
     let parsed = parse(&input);
-    println!("{}", get_top_row(&parsed.0).unwrap());
+    println!("{}", part1(parsed.clone()));
+    println!("{}", part2(parsed.clone()));
 }
