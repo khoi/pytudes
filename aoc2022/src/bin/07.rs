@@ -36,7 +36,7 @@ fn parse(input: &str) -> HashMap<String, usize> {
                         ("dir", dir) => {
                             nodes_map.insert(format!("{}/{}", current_dir, dir), 0);
                         }
-                        (size, file) => {
+                        (size, _) => {
                             let mut path = current_dir.clone();
                             let size = size.parse::<usize>().unwrap();
                             loop {
@@ -47,7 +47,6 @@ fn parse(input: &str) -> HashMap<String, usize> {
                                 path.drain(path.rfind('/').unwrap_or(0)..);
                             }
                         }
-                        _ => unreachable!(),
                     });
                 Some(())
             }
