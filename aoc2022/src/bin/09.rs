@@ -1,4 +1,3 @@
-use std::collections::{HashSet};
 use aoc2022::{Direction, Point, InfiniteGrid};
 use std::cmp;
 
@@ -28,22 +27,26 @@ fn calculate_new_tail_position(head: &Point, tail: &Point) -> Point {
     }
 }
 
-fn count_tail_moves(input: &Input) -> usize {
-    let mut current_head_pos= Point { x: 0, y: 0 };
-    let mut current_tail_pos= Point { x: 0, y: 0 };
-    
-    let mut tail_grid = InfiniteGrid::new();
-    tail_grid.insert(current_tail_pos.clone(), 1);
+fn count_tail_moves(input: &Input, knot_count: usize) -> usize {
+    let mut knots = (0..knot_count).map(|_| Point { x: 0, y: 0 }).collect::<Vec<_>>();
 
-    input.iter().for_each(|f| {
-        for _ in 0..f.1 {
-            current_head_pos = current_head_pos.get_neighbor(&f.0);
-            let new_tail_pos = calculate_new_tail_position(&current_head_pos, &current_tail_pos);
-            
-            let tails_move = current_head_pos.chebyshev_distance(&current_tail_pos) > 1; 
-            if tails_move {
-                current_tail_pos = new_tail_pos;
-                tail_grid.insert(current_tail_pos.clone(), 1);
+    let mut tail_grid = InfiniteGrid::new();
+    tail_grid.insert(Point { x: 0, y: 0 }, 1);
+
+    input.iter().for_each(|(dir, dist)| {
+        for _ in 0..*dist {
+            knots[0] = knots[0].get_neighbor(dir);
+
+            for i in 0..(knot_count - 1) {
+                let head = &knots[i];
+                let tail = &knots[i + 1];
+                let tails_move = head.chebyshev_distance(&tail) > 1; 
+                if tails_move {
+                    knots[i + 1] = calculate_new_tail_position(&head, &tail);
+                    if i == knot_count - 2 {
+                        tail_grid.insert(knots[i + 1].clone(), 1);
+                    }
+                }
             }
         }
     });
@@ -51,11 +54,11 @@ fn count_tail_moves(input: &Input) -> usize {
 }
 
 fn part1(input: Input) -> usize {
-    count_tail_moves(&input)
+    count_tail_moves(&input, 2)
 }
 
-fn part2(input: Input) -> u64 {
-    2
+fn part2(input: Input) -> usize {
+    count_tail_moves(&input, 10)
 }
 
 fn main() {
@@ -70,7 +73,7 @@ fn main() {
 mod tests {
     use super::*;
 
-    static INPUT: &str = "R 4
+    static INPUT1: &str = "R 4
 U 4
 L 3
 D 1
@@ -78,16 +81,24 @@ R 4
 D 1
 L 5
 R 2";
+static INPUT2: &str = "R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20";
 
     #[test]
     fn test_1() {
-        let result = part1(parse(INPUT));
+        let result = part1(parse(INPUT1));
         assert_eq!(result, 13);
     }
 
-    // #[test]
-    // fn test_2() {
-    //     let result = part2(parse(INPUT));
-    //     assert_eq!(result, 4);
-    // }
+    #[test]
+    fn test_2() {
+        assert_eq!(part2(parse(INPUT1)), 1);
+        assert_eq!(part2(parse(INPUT2)), 36);
+    }
 }
