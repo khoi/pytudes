@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 use aoc2022::read_file_input;
 
 type Input<'a> = Vec<&'a str>;
@@ -6,11 +7,11 @@ fn parse(input: &str) -> Input {
     input.lines().collect()
 }
 
-pub fn part1(input: Input) -> u64 {
+fn part1(input: Input) -> usize {
     1
 }
 
-fn part2(input: Input) -> u64 {
+fn part2(input: Input) -> usize {
     2
 }
 
