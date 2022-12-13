@@ -1,9 +1,9 @@
 use std::collections::{HashSet};
+use aoc2022::Point;
 
 use aoc2022::read_file_input;
 
 type Input<'a> = Vec<(char, usize)>;
-type Position = (isize, isize);
 
 fn parse(input: &str) -> Input {
     input.lines().map(|l| {
@@ -12,9 +12,9 @@ fn parse(input: &str) -> Input {
     }).collect()
 }
 
-fn is_touching(head: Position, tail: Position) -> bool {
-    let del_x = (head.0 - tail.0).abs();
-    let del_y = (head.1 - tail.1).abs();
+fn is_touching(head: &Point, tail: &Point) -> bool {
+    let del_x = (head.x - tail.x).abs();
+    let del_y = (head.y - tail.y).abs();
     match (del_x, del_y) {
         (0, 0) => true,
         (1, 1) => true,
@@ -24,14 +24,14 @@ fn is_touching(head: Position, tail: Position) -> bool {
     }
 }
 
-fn follow_instruction_directions(head: Position, tail: Position) -> Vec<char> {
-    if is_touching(head, tail) {
+fn follow_instruction_directions(head: &Point, tail: &Point) -> Vec<char> {
+    if is_touching(&head, &tail) {
         return vec![];
     }
 
     let mut directions = vec![];
-    let del_x = head.0 - tail.0;
-    let del_y = head.1 - tail.1;
+    let del_x = head.x - tail.x;
+    let del_y = head.y - tail.y;
     
     if del_x != 0 {
         directions.push(if del_x > 0 {'R'} else {'L'});
@@ -44,39 +44,42 @@ fn follow_instruction_directions(head: Position, tail: Position) -> Vec<char> {
     directions
 }
 
-fn new_pos(pos: Position, dir: char, dist: usize) -> Position {
+fn new_pos(pos: &Point, dir: char, dist: usize) -> Point {
     match dir {
-        'R' => (pos.0 + dist as isize, pos.1),
-        'L' => (pos.0 - dist as isize, pos.1),
-        'U' => (pos.0, pos.1 + dist as isize),
-        'D' => (pos.0, pos.1 - dist as isize),
+        'R' => Point {x: pos.x + dist as isize,y: pos.y},
+        'L' => Point {x: pos.x - dist as isize,y: pos.y},
+        'U' => Point {x: pos.x,y: pos.y + dist as isize},
+        'D' => Point {x: pos.x,y: pos.y - dist as isize},
         _ => panic!("Invalid direction"),
     }
 }
 
-fn part1(input: Input) -> usize {
-    
-    let mut current_head_pos: Position = (0, 0);
-    let mut current_tail_pos: Position = (0, 0);
-    let mut visited: HashSet<Position> = HashSet::new();
-    visited.insert(current_tail_pos);
+fn count_tail_moves(input: &Input) -> usize {
+    let mut current_head_pos= Point { x: 0, y: 0 };
+    let mut current_tail_pos= Point { x: 0, y: 0 };
+    let mut visited: HashSet<Point> = HashSet::new();
+    visited.insert(current_tail_pos.clone());
 
     input.iter().for_each(|f| {
         for _ in 0..f.1 {
-            current_head_pos = new_pos(current_head_pos, f.0, 1);
-            let follow_instructions = follow_instruction_directions(current_head_pos, current_tail_pos);
+            current_head_pos = new_pos(&current_head_pos, f.0, 1);
+            let follow_instructions = follow_instruction_directions(&current_head_pos, &current_tail_pos);
 
             for i in 0..follow_instructions.len() {
                 let is_diagonal = follow_instructions.len() == 2;
-                current_tail_pos = new_pos(current_tail_pos, follow_instructions[i], 1);
+                current_tail_pos = new_pos(&current_tail_pos, follow_instructions[i], 1);
                 if is_diagonal && i == 0 { // skip the first step of a diagonal
                     continue;
                 }
-                visited.insert(current_tail_pos);
+                visited.insert(current_tail_pos.clone());
             }
         }
     });
     visited.len() 
+}
+
+fn part1(input: Input) -> usize {
+    count_tail_moves(&input)
 }
 
 fn part2(input: Input) -> u64 {

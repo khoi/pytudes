@@ -6,3 +6,9 @@ pub fn read_file_input(day: u8) -> String {
 
     fs::read_to_string(filepath).unwrap()
 }
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct Point {
+    pub x: isize,
+    pub y: isize,
+}
