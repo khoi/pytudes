@@ -1,7 +1,5 @@
-use std::str::FromStr;
-
-#[allow(dead_code)]
 use aoc2022::read_file_input;
+use std::str::FromStr;
 
 #[derive(Debug, Clone)]
 struct MonkeyTest {

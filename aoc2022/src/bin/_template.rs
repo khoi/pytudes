@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 use aoc2022::read_file_input;
 
 type Input<'a> = Vec<&'a str>;
