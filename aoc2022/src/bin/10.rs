@@ -26,11 +26,10 @@ fn parse(input: &str) -> Input {
     input.lines().map(|l| l.parse().unwrap()).collect()
 }
 
-fn execute(input: &mut Input, scoring: impl Fn(i32, isize) -> isize) -> isize {
+fn execute(input: &mut Input, mut callback: impl FnMut(i32, isize)) -> isize {
     let mut register = 1;
     let mut cycle = 1;
     let mut last_adding_instruction = None;
-    let mut score = 0;
 
     while !input.is_empty() {
         if last_adding_instruction == None {
@@ -43,7 +42,7 @@ fn execute(input: &mut Input, scoring: impl Fn(i32, isize) -> isize) -> isize {
             }
         }
 
-        score += scoring(cycle, register);
+        callback(cycle, register);
 
         if let Some((adding_cycle, val)) = last_adding_instruction {
             if adding_cycle == cycle {
@@ -55,21 +54,35 @@ fn execute(input: &mut Input, scoring: impl Fn(i32, isize) -> isize) -> isize {
         cycle += 1
     }
 
-    score
+    register
 }
 
 fn part1(input: Input) -> isize {
+    let mut strength = 0;
     execute(&mut input.clone(), |cycle, value| {
         if cycle == 20 || cycle % 40 == 20 {
-            cycle as isize * value
-        } else {
-            0
+            strength += value * cycle as isize;
         }
-    })
+    });
+    strength
 }
 
-fn part2(input: Input) -> isize {
-    2
+fn part2(input: Input) -> String {
+    let mut crt = vec![];
+
+    execute(&mut input.clone(), |cycle, value| {
+        let col = (cycle as isize - 1) % 40;
+        crt.push(if col >= value - 1 && col <= value + 1 {
+            '#'
+        } else {
+            '.'
+        });
+    });
+
+    crt.chunks(40)
+        .map(String::from_iter)
+        .collect::<Vec<String>>()
+        .join("\n")
 }
 
 fn main() {
@@ -77,7 +90,7 @@ fn main() {
     let parsed = parse(&input);
 
     println!("{}", part1(parsed.clone()));
-    // println!("{}", part2(parsed.clone()));
+    println!("{}", part2(parsed.clone()));
 }
 
 #[cfg(test)]
@@ -235,11 +248,5 @@ noop";
     fn test_1() {
         let result = part1(parse(INPUT));
         assert_eq!(result, 13140);
-    }
-
-    #[test]
-    fn test_2() {
-        let result = part2(parse(INPUT));
-        assert_eq!(result, 4);
     }
 }
