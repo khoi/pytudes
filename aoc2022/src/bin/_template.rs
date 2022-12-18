@@ -15,7 +15,7 @@ fn part2(input: Input) -> usize {
 }
 
 fn main() {
-    let input = read_file_input(04);
+    let input = read_file_input();
     let parsed = parse(&input);
 
     println!("{}", part1(parsed.clone()));
@@ -31,12 +31,12 @@ mod tests {
     #[test]
     fn test_1() {
         let result = part1(parse(INPUT));
-        assert_eq!(result, 2);
+        assert_eq!(result, 1);
     }
 
     #[test]
     fn test_2() {
         let result = part2(parse(INPUT));
-        assert_eq!(result, 4);
+        assert_eq!(result, 2);
     }
 }
