@@ -18,7 +18,7 @@ clean: # Clean
 make install: # Install aoc-cli
 	cargo install aoc-cli
 
-fetch-day: # ie: make fetch-day 1
+fetch-day: # ie: make fetch-day day=1
 	@if [ -z "$(day)" ]; then \
 		echo "Usage: make fetch-day day=N (where N is 1-30)"; \
 		exit 1; \
@@ -32,4 +32,19 @@ fetch-day: # ie: make fetch-day 1
 	aoc download -o -d $$padded_day -i src/inputs/$$padded_day.txt -p src/inputs/$$padded_day.md; \
 	echo "Fetched day $$padded_day puzzle and input"
 
-.PHONY: run clean fetch-day help
+run-day: # ie: make run-day day=1
+	@if [ -z "$(day)" ]; then \
+		echo "Usage: make run-day N (where N is 1-30)"; \
+		exit 1; \
+	fi
+	@if ! [ "$(day)" -ge 1 ] || ! [ "$(day)" -le 30 ]; then \
+		echo "Error: day must be between 1 and 30"; \
+		exit 1; \
+	fi
+	@padded_day=$$(printf "%02d" $(day)); \
+	cargo run --bin $$padded_day
+
+%:
+	@:
+
+.PHONY: run clean fetch-day run-day help
