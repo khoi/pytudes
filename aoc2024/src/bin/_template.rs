@@ -1,4 +1,4 @@
-use aoc2022::read_file_input;
+use aoc2024::read_file_input;
 
 type Input<'a> = Vec<&'a str>;
 
@@ -15,7 +15,7 @@ fn part2(input: Input) -> usize {
 }
 
 fn main() {
-    let input = read_file_input();
+    let input = read_file_input(1);
     let parsed = parse(&input);
 
     println!("{}", part1(parsed.clone()));

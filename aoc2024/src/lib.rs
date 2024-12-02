@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-use std::fmt::Debug;
-use std::str::FromStr;
 use std::{env, fs};
 
 pub fn read_file_input(day: u8) -> String {
