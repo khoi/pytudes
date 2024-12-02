@@ -15,6 +15,9 @@ run: # Run all days
 clean: # Clean
 	cargo clean
 
+make install: # Install aoc-cli
+	cargo install aoc-cli
+
 fetch-day: # ie: make fetch-day 1
 	@if [ -z "$(day)" ]; then \
 		echo "Usage: make fetch-day day=N (where N is 1-30)"; \
