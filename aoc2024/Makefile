@@ -54,7 +54,7 @@ test-day: # ie: make test-day day=1
 		exit 1; \
 	fi
 	@padded_day=$$(printf "%02d" $(day)); \
-	cargo test --bin $$padded_day
+	cargo test -- --nocapture --bin $$padded_day
 
 %:
 	@:
