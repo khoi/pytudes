@@ -24,6 +24,8 @@ fn part1(input: Input) -> usize {
     sum
 }
 
+// * The levels are either *all increasing* or *all decreasing*.
+// * Any two adjacent levels differ by *at least one* and *at most three*.
 fn is_safe(row: Vec<i64>) -> bool {
     if row.len() < 2 {
         return false;
@@ -47,8 +49,37 @@ fn is_safe(row: Vec<i64>) -> bool {
     true
 }
 
+fn is_safe2(row: Vec<i64>) -> bool {
+    if row.len() < 2 {
+        return false;
+    }
+
+    // First check if it's already safe without removing anything
+    if is_safe(row.clone()) {
+        return true;
+    }
+
+    // Try removing each element one at a time
+    for i in 0..row.len() {
+        let mut modified_row = row.clone();
+        modified_row.remove(i);
+
+        if is_safe(modified_row) {
+            return true;
+        }
+    }
+
+    false
+}
+
 fn part2(input: Input) -> usize {
-    2
+    let mut sum = 0;
+    for row in input.iter() {
+        if is_safe2(row.clone()) {
+            sum += 1;
+        }
+    }
+    sum
 }
 
 fn main() {
@@ -81,6 +112,6 @@ mod tests {
     #[test]
     fn test_2() {
         let result = part2(parse(INPUT));
-        assert_eq!(result, 2);
+        assert_eq!(result, 4);
     }
 }
