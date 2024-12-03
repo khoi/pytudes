@@ -44,7 +44,19 @@ run-day: # ie: make run-day day=1
 	@padded_day=$$(printf "%02d" $(day)); \
 	cargo run --bin $$padded_day
 
+test-day: # ie: make test-day day=1
+	@if [ -z "$(day)" ]; then \
+		echo "Usage: make test-day N (where N is 1-30)"; \
+		exit 1; \
+	fi
+	@if ! [ "$(day)" -ge 1 ] || ! [ "$(day)" -le 30 ]; then \
+		echo "Error: day must be between 1 and 30"; \
+		exit 1; \
+	fi
+	@padded_day=$$(printf "%02d" $(day)); \
+	cargo test --bin $$padded_day
+
 %:
 	@:
 
-.PHONY: run clean fetch-day run-day help
+.PHONY: run clean fetch-day run-day test-day help
