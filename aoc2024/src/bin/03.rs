@@ -1,3 +1,5 @@
+use core::str;
+
 use aoc2024::read_file_input;
 use nom::{
     branch::alt,
@@ -16,6 +18,22 @@ struct Mul {
     rhs: i64,
 }
 
+#[derive(Debug, PartialEq, Clone)]
+enum Instruction {
+    Do,
+    Dont,
+}
+
+fn parse_do(input: &str) -> IResult<&str, Instruction> {
+    let (remaining, _) = tag("do()")(input)?;
+    Ok((remaining, Instruction::Do))
+}
+
+fn parse_dont(input: &str) -> IResult<&str, Instruction> {
+    let (remaining, _) = tag("don't()")(input)?;
+    Ok((remaining, Instruction::Dont))
+}
+
 fn parse_integer_pair(input: &str) -> IResult<&str, (i64, i64)> {
     separated_pair(i64, tag(","), i64)(input)
 }
@@ -25,24 +43,28 @@ fn parse_mul(input: &str) -> IResult<&str, Mul> {
     Ok((remaining, Mul { lhs, rhs }))
 }
 
-fn extract_muls(input: &str) -> Vec<Mul> {
+fn extract_muls(input: &str) -> Vec<(Mul, Instruction)> {
     let mut muls = Vec::new();
     let mut remaining = input;
+    let mut current_instruction = Instruction::Do; // Initially enabled
 
     while !remaining.is_empty() {
-        match parse_mul(remaining) {
-            Ok((rest, mul)) => {
-                muls.push(mul);
-                remaining = rest;
-            }
-            Err(_) => {
-                // Move forward one character if no valid mul pattern is found
-                remaining = &remaining[1..];
-                if remaining.is_empty() {
-                    break;
-                }
-            }
+        // Try to parse do() or don't() first
+        if let Ok((rest, instruction)) = alt((parse_do, parse_dont))(remaining) {
+            current_instruction = instruction;
+            remaining = rest;
+            continue;
         }
+
+        // Try to parse mul regardless of enabled state
+        if let Ok((rest, mul)) = parse_mul(remaining) {
+            muls.push((mul, current_instruction.clone()));
+            remaining = rest;
+            continue;
+        }
+
+        // Move forward one character if no pattern matches
+        remaining = &remaining[1..];
     }
     muls
 }
@@ -55,12 +77,22 @@ fn part1(input: Input) -> i64 {
     input
         .iter()
         .flat_map(|line| extract_muls(line))
-        .map(|mul| mul.lhs * mul.rhs)
+        .filter(|(_, instruction)| true)
+        .map(|(mul, _)| mul.lhs * mul.rhs)
         .sum()
 }
 
 fn part2(input: Input) -> i64 {
-    2
+    input
+        .iter()
+        .flat_map(|line| extract_muls(line))
+        .filter(|(m, instruction)| {
+            println!("{:?}", instruction);
+            println!("{:?}", m);
+            matches!(instruction, Instruction::Do)
+        })
+        .map(|(mul, _)| mul.lhs * mul.rhs)
+        .sum()
 }
 
 fn main() {
@@ -76,6 +108,8 @@ mod tests {
     use super::*;
 
     static INPUT: &str = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
+    static INPUT2: &str =
+        "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
 
     #[test]
     fn test_1() {
@@ -85,7 +119,7 @@ mod tests {
 
     #[test]
     fn test_2() {
-        let result = part2(parse(INPUT));
-        assert_eq!(result, 2);
+        let result = part2(parse(INPUT2));
+        assert_eq!(result, 48);
     }
 }
