@@ -77,7 +77,6 @@ fn part1(input: Input) -> i64 {
     input
         .iter()
         .flat_map(|line| extract_muls(line))
-        .filter(|(_, instruction)| true)
         .map(|(mul, _)| mul.lhs * mul.rhs)
         .sum()
 }
@@ -109,7 +108,7 @@ mod tests {
 
     static INPUT: &str = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
     static INPUT2: &str =
-        "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
+        "xmul(2,4)&mul[3,7]!^don't()do()don't()mul(3,2)_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
 
     #[test]
     fn test_1() {
@@ -119,7 +118,8 @@ mod tests {
 
     #[test]
     fn test_2() {
-        let result = part2(parse(INPUT2));
+        let input = read_file_input(3);
+        let result = part2(parse(&input));
         assert_eq!(result, 48);
     }
 }
