@@ -52,13 +52,11 @@ fn parse(input: &str) -> Input {
 }
 
 fn part1(input: Input) -> i64 {
-    let mut sum = 0;
-    for line in input {
-        let muls = extract_muls(line);
-        let res = muls.iter().fold(0, |acc, mul| acc + mul.lhs * mul.rhs);
-        sum += res
-    }
-    sum
+    input
+        .iter()
+        .flat_map(|line| extract_muls(line))
+        .map(|mul| mul.lhs * mul.rhs)
+        .sum()
 }
 
 fn part2(input: Input) -> i64 {
