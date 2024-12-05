@@ -1,25 +1,25 @@
 use aoc2024::read_file_input;
 
-type Input<'a> = Vec<&'a str>;
+type Input<'a> = &'a str;
 
 fn parse(input: &str) -> Input {
-    input.lines().collect()
+    input.trim()
 }
 
 fn part1(input: Input) -> usize {
-    1
+    input.len()
 }
 
 fn part2(input: Input) -> usize {
-    2
+    input.len()
 }
 
 fn main() {
     let input = read_file_input(1);
     let parsed = parse(&input);
 
-    println!("{}", part1(parsed.clone()));
-    println!("{}", part2(parsed.clone()));
+    println!("{}", part1(parsed));
+    println!("{}", part2(parsed));
 }
 
 #[cfg(test)]
