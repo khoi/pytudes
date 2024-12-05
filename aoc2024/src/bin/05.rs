@@ -50,6 +50,12 @@ fn parse(input: &str) -> Input {
 fn is_valid(rule: &Rule, lhs: u64, rhs: u64) -> bool {
     let mut current = lhs;
 
+    if let Some(back_refs) = rule.get(&rhs) {
+        if back_refs.contains(&lhs) {
+            return false;
+        }
+    }
+
     while let Some(next_values) = rule.get(&current) {
         if next_values.contains(&rhs) {
             return true;
@@ -129,18 +135,37 @@ mod tests {
 ";
 
     #[test]
-    fn test_is_valid() {
-        let mut rule: HashMap<u64, HashSet<u64>> = HashMap::new();
+    fn test_cyclic_path() {
+        let input = "75|62
+62|16
+16|75
 
-        // Setup some rules:
-        // 47 -> {53, 61}
-        // 53 -> {29}
-        // 61 -> {13, 29}
-        // 29 -> {13}
-        rule.entry(47).or_default().extend([53, 61]);
-        rule.entry(53).or_default().insert(29);
-        rule.entry(61).or_default().extend([13, 29]);
-        rule.entry(29).or_default().insert(13);
+75,16
+";
+
+        let (rule, _) = parse(input);
+
+        // Verify direct path works
+        assert!(is_valid(&rule, 75, 62), "75 should connect to 62");
+        assert!(is_valid(&rule, 62, 16), "62 should connect to 16");
+        assert!(is_valid(&rule, 16, 75), "16 should connect to 75");
+
+        // Verify the required path works
+        assert!(!is_valid(&rule, 75, 16), "75 should not connect to 16");
+    }
+
+    #[test]
+    fn test_is_valid() {
+        let input = "47|53
+47|61
+53|29
+61|13
+61|29
+29|13
+
+47,53"; // Adding a dummy page since we only care about the rules
+
+        let (rule, _) = parse(input);
 
         // Direct connections
         assert!(is_valid(&rule, 47, 53), "47 should connect to 53");
