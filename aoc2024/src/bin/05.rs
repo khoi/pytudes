@@ -1,5 +1,5 @@
 use aoc2024::read_file_input;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 type Rule = HashSet<u64>;
 type Input = (Rule, Vec<Vec<u64>>);
