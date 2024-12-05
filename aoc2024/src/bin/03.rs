@@ -1,16 +1,17 @@
 use core::str;
+use std::process::exit;
 
 use aoc2024::read_file_input;
 use nom::{
     branch::alt,
     bytes::complete::tag,
-    sequence::{delimited, separated_pair, tuple},
+    sequence::{delimited, separated_pair},
     IResult,
 };
 
 use nom::character::complete::i64;
 
-type Input<'a> = Vec<&'a str>;
+type Input<'a> = &'a str;
 
 #[derive(Debug, PartialEq)]
 struct Mul {
@@ -70,26 +71,20 @@ fn extract_muls(input: &str) -> Vec<(Mul, Instruction)> {
 }
 
 fn parse(input: &str) -> Input {
-    input.trim().lines().collect()
+    input.trim()
 }
 
 fn part1(input: Input) -> i64 {
-    input
-        .iter()
-        .flat_map(|line| extract_muls(line))
+    extract_muls(input)
+        .into_iter()
         .map(|(mul, _)| mul.lhs * mul.rhs)
         .sum()
 }
 
 fn part2(input: Input) -> i64 {
-    input
-        .iter()
-        .flat_map(|line| extract_muls(line))
-        .filter(|(m, instruction)| {
-            println!("{:?}", instruction);
-            println!("{:?}", m);
-            matches!(instruction, Instruction::Do)
-        })
+    extract_muls(input)
+        .into_iter()
+        .filter(|(m, instruction)| matches!(instruction, Instruction::Do))
         .map(|(mul, _)| mul.lhs * mul.rhs)
         .sum()
 }
@@ -98,8 +93,8 @@ fn main() {
     let input = read_file_input(3);
     let parsed = parse(&input);
 
-    println!("{}", part1(parsed.clone()));
-    println!("{}", part2(parsed.clone()));
+    println!("{}", part1(parsed));
+    println!("{}", part2(parsed));
 }
 
 #[cfg(test)]
@@ -108,7 +103,7 @@ mod tests {
 
     static INPUT: &str = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
     static INPUT2: &str =
-        "xmul(2,4)&mul[3,7]!^don't()do()don't()mul(3,2)_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
+        "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
 
     #[test]
     fn test_1() {
@@ -118,8 +113,7 @@ mod tests {
 
     #[test]
     fn test_2() {
-        let input = read_file_input(3);
-        let result = part2(parse(&input));
+        let result = part2(parse(INPUT2));
         assert_eq!(result, 48);
     }
 }
