@@ -1,5 +1,4 @@
 use core::str;
-use std::process::exit;
 
 use aoc2024::read_file_input;
 use nom::{
@@ -84,7 +83,7 @@ fn part1(input: Input) -> i64 {
 fn part2(input: Input) -> i64 {
     extract_muls(input)
         .into_iter()
-        .filter(|(m, instruction)| matches!(instruction, Instruction::Do))
+        .filter(|(_m, instruction)| matches!(instruction, Instruction::Do))
         .map(|(mul, _)| mul.lhs * mul.rhs)
         .sum()
 }
