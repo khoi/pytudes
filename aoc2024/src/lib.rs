@@ -1,6 +1,6 @@
 use std::{
     env,
-    fmt::{self},
+    fmt::{self, Display},
     fs,
     str::FromStr,
 };
@@ -12,7 +12,7 @@ pub fn read_file_input(day: u8) -> String {
     fs::read_to_string(filepath).unwrap()
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
 pub enum Direction {
     N,
     NE,
