@@ -1,5 +1,22 @@
 use aoc2024::read_file_input;
 
+fn cartesian_product<T: Clone>(items: Vec<T>, repeat: usize) -> Vec<Vec<T>> {
+    if repeat == 0 {
+        return vec![vec![]];
+    }
+
+    let mut result = Vec::new();
+    let items_clone = items.clone();
+
+    for item in items {
+        for mut sub_product in cartesian_product(items_clone.clone(), repeat - 1) {
+            sub_product.insert(0, item.clone());
+            result.push(sub_product);
+        }
+    }
+
+    result
+}
 type Input = Vec<(u64, Vec<u64>)>;
 
 fn parse(input: &str) -> Input {
@@ -17,7 +34,7 @@ fn parse(input: &str) -> Input {
         .collect()
 }
 
-fn evaluate(nums: &[u64], ops: &[char]) -> u64 {
+fn evaluate(nums: &[u64], ops: Vec<char>) -> u64 {
     assert_eq!(
         ops.len(),
         nums.len() - 1,
@@ -29,33 +46,26 @@ fn evaluate(nums: &[u64], ops: &[char]) -> u64 {
         match op {
             '+' => result += nums[i + 1],
             '*' => result *= nums[i + 1],
+            '|' => {
+                let concat = format!("{}{}", result, nums[i + 1]);
+                result = concat.parse().unwrap();
+            }
             _ => panic!("Unknown operator"),
         }
     }
+
     result
 }
 
-fn can_make_value(target: u64, nums: &[u64]) -> bool {
+fn can_make_value(target: u64, nums: &[u64], ops: Vec<char>) -> bool {
     if nums.len() == 1 {
         return nums[0] == target;
     }
 
-    let ops = ['+', '*'];
-    let n = nums.len() - 1;
-    let total_combinations = ops.len().pow(n as u32);
+    let operator_combinations = cartesian_product(ops, nums.len() - 1);
 
-    // Try all possible combinations of operators
-    for i in 0..total_combinations {
-        let mut operators = Vec::with_capacity(n);
-        let mut num = i;
-
-        // Convert number to base-2 to get operator combinations
-        for _ in 0..n {
-            operators.push(ops[num % 2]);
-            num /= 2;
-        }
-
-        if evaluate(nums, &operators) == target {
+    for ops in operator_combinations {
+        if evaluate(nums, ops) == target {
             return true;
         }
     }
@@ -67,7 +77,7 @@ fn part1(input: Input) -> u64 {
     input
         .iter()
         .filter_map(|(target, nums)| {
-            if can_make_value(*target, nums) {
+            if can_make_value(*target, nums, vec!['+', '*']) {
                 Some(target)
             } else {
                 None
@@ -76,16 +86,25 @@ fn part1(input: Input) -> u64 {
         .sum()
 }
 
-fn part2(input: Input) -> usize {
-    input.iter().count()
+fn part2(input: Input) -> u64 {
+    input
+        .iter()
+        .filter_map(|(target, nums)| {
+            if can_make_value(*target, nums, vec!['+', '*', '|']) {
+                Some(target)
+            } else {
+                None
+            }
+        })
+        .sum()
 }
 
 fn main() {
     let input = read_file_input(7);
     let parsed = parse(&input);
 
-    println!("{}", part1(parsed));
-    // println!("{}", part2(parsed));
+    println!("{}", part1(parsed.clone()));
+    println!("{}", part2(parsed.clone()));
 }
 
 #[cfg(test)]
@@ -110,9 +129,9 @@ mod tests {
         assert_eq!(result, 3749);
     }
 
-    // #[test]
-    // fn test_2() {
-    //     let result = part2(parse(INPUT));
-    //     assert_eq!(1, 1);
-    // }
+    #[test]
+    fn test_2() {
+        let result = part2(parse(INPUT));
+        assert_eq!(result, 11387);
+    }
 }
