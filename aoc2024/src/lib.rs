@@ -1,6 +1,6 @@
 use std::{
     env,
-    fmt::{self, Display},
+    fmt::{self},
     fs,
     str::FromStr,
 };
