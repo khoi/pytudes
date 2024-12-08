@@ -26,6 +26,17 @@ pub fn combinations<T: Clone>(items: Vec<T>, k: usize) -> Vec<Vec<T>> {
     result
 }
 
+pub fn gcd(mut a: isize, mut b: isize) -> isize {
+    a = a.abs();
+    b = b.abs();
+    while b != 0 {
+        let temp = b;
+        b = a % b;
+        a = temp;
+    }
+    a
+}
+
 pub fn cartesian_product<T: Clone>(items: Vec<T>, repeat: usize) -> Vec<Vec<T>> {
     if repeat == 0 {
         return vec![vec![]];
@@ -70,12 +81,6 @@ pub struct Point {
 }
 
 impl Point {
-    pub fn is_in_line(&self, other: &Point) -> bool {
-        self.x == other.x
-            || self.y == other.y
-            || (self.x - other.x).abs() == (self.y - other.y).abs()
-    }
-
     pub fn opposite(&self, other: &Point) -> Point {
         Point {
             x: other.x + (other.x - self.x),
@@ -138,9 +143,22 @@ pub struct Grid<T> {
 
 impl fmt::Debug for Grid<char> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (i, line) in self.data.iter().enumerate() {
-            for (j, c) in line.iter().enumerate() {
-                write!(f, "{}({},{}) ", c, j, i)?;
+        // Print column headers
+        write!(f, "  |")?;
+        for x in 0..self.width {
+            write!(f, " {}", x)?;
+        }
+        writeln!(f)?;
+
+        // Print separator line
+        write!(f, "--+")?;
+        writeln!(f, "{:-<width$}", "", width = self.width * 2)?;
+
+        // Print each row with row numbers
+        for (y, line) in self.data.iter().enumerate() {
+            write!(f, "{:>2}|", y)?;
+            for c in line.iter() {
+                write!(f, " {}", c)?;
             }
             writeln!(f)?;
         }

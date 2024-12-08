@@ -3,7 +3,7 @@ use std::{
     str::FromStr,
 };
 
-use aoc2024::{combinations, read_file_input, Grid, Point};
+use aoc2024::{combinations, gcd, read_file_input, Grid, Point};
 
 type Input = Grid<char>;
 
@@ -43,7 +43,50 @@ fn part1(input: Input) -> usize {
 }
 
 fn part2(input: Input) -> usize {
-    2
+    let char_positions: HashMap<char, Vec<Point>> = input
+        .points()
+        .filter(|p| {
+            let c = *input.get(p);
+            !c.is_ascii_whitespace() && c != '.'
+        })
+        .fold(HashMap::new(), |mut acc, p| {
+            acc.entry(*input.get(&p)).or_default().push(p);
+            acc
+        });
+
+    let mut inline_points = HashSet::new();
+
+    for positions in char_positions.values() {
+        for combo in combinations(positions.clone(), 2) {
+            let dx = combo[1].x - combo[0].x;
+            let dy = combo[1].y - combo[0].y;
+
+            // Get the GCD to find the smallest step size
+            let gcd = gcd(dx, dy);
+            let step_x = dx / gcd;
+            let step_y = dy / gcd;
+
+            // Calculate points in both directions using steps
+            let steps_forward = (0..)
+                .map(|i| Point {
+                    x: combo[0].x + i * step_x,
+                    y: combo[0].y + i * step_y,
+                })
+                .take_while(|p| input.is_in_bound(p));
+
+            let steps_backward = (0..)
+                .map(|i| Point {
+                    x: combo[0].x - i * step_x,
+                    y: combo[0].y - i * step_y,
+                })
+                .take_while(|p| input.is_in_bound(p));
+
+            inline_points.extend(steps_forward);
+            inline_points.extend(steps_backward);
+        }
+    }
+
+    inline_points.len()
 }
 
 fn main() {
@@ -82,6 +125,6 @@ mod tests {
     #[test]
     fn test_2() {
         let result = part2(parse(INPUT));
-        assert_eq!(result, 2);
+        assert_eq!(result, 34);
     }
 }
