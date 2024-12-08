@@ -31,6 +31,13 @@ pub struct Point {
 }
 
 impl Point {
+    pub fn opposite(&self, other: &Point) -> Point {
+        Point {
+            x: other.x + (other.x - self.x),
+            y: other.y + (other.y - self.y),
+        }
+    }
+
     pub fn manhattan_distance(&self, other: &Point) -> usize {
         ((self.x - other.x).abs() + (self.y - other.y).abs()) as usize
     }
@@ -182,5 +189,76 @@ impl<T> Iterator for GridIterator<'_, T> {
         } else {
             None
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_point_opposite() {
+        let p1 = Point { x: 1, y: 1 };
+        let p2 = Point { x: 2, y: 3 };
+        let opposite = p1.opposite(&p2);
+        assert_eq!(opposite, Point { x: 3, y: 5 });
+
+        // Test with negative coordinates
+        let p3 = Point { x: -1, y: -2 };
+        let p4 = Point { x: 1, y: 2 };
+        let opposite2 = p3.opposite(&p4);
+        assert_eq!(opposite2, Point { x: 3, y: 6 });
+    }
+
+    #[test]
+    fn test_manhattan_distance() {
+        let p1 = Point { x: 0, y: 0 };
+        let p2 = Point { x: 3, y: 4 };
+        assert_eq!(p1.manhattan_distance(&p2), 7);
+
+        // Test with negative coordinates
+        let p3 = Point { x: -2, y: -3 };
+        let p4 = Point { x: 2, y: 1 };
+        assert_eq!(p3.manhattan_distance(&p4), 8);
+
+        // Test zero distance
+        let p5 = Point { x: 1, y: 1 };
+        assert_eq!(p5.manhattan_distance(&p5), 0);
+    }
+
+    #[test]
+    fn test_chebyshev_distance() {
+        let p1 = Point { x: 0, y: 0 };
+        let p2 = Point { x: 3, y: 4 };
+        assert_eq!(p1.chebyshev_distance(&p2), 4);
+
+        // Test with negative coordinates
+        let p3 = Point { x: -2, y: -3 };
+        let p4 = Point { x: 2, y: 1 };
+        assert_eq!(p3.chebyshev_distance(&p4), 4);
+
+        // Test zero distance
+        let p5 = Point { x: 1, y: 1 };
+        assert_eq!(p5.chebyshev_distance(&p5), 0);
+    }
+
+    #[test]
+    fn test_get_neighbor() {
+        let p = Point { x: 1, y: 1 };
+
+        // Test all eight directions
+        assert_eq!(p.get_neighbor(&Direction::N), Point { x: 1, y: 0 });
+        assert_eq!(p.get_neighbor(&Direction::NE), Point { x: 2, y: 0 });
+        assert_eq!(p.get_neighbor(&Direction::E), Point { x: 2, y: 1 });
+        assert_eq!(p.get_neighbor(&Direction::SE), Point { x: 2, y: 2 });
+        assert_eq!(p.get_neighbor(&Direction::S), Point { x: 1, y: 2 });
+        assert_eq!(p.get_neighbor(&Direction::SW), Point { x: 0, y: 2 });
+        assert_eq!(p.get_neighbor(&Direction::W), Point { x: 0, y: 1 });
+        assert_eq!(p.get_neighbor(&Direction::NW), Point { x: 0, y: 0 });
+
+        // Test with negative coordinates
+        let p2 = Point { x: -1, y: -1 };
+        assert_eq!(p2.get_neighbor(&Direction::N), Point { x: -1, y: -2 });
+        assert_eq!(p2.get_neighbor(&Direction::E), Point { x: 0, y: -1 });
     }
 }
