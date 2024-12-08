@@ -47,8 +47,8 @@ fn evaluate(nums: &[u64], ops: Vec<char>) -> u64 {
             '+' => result += nums[i + 1],
             '*' => result *= nums[i + 1],
             '|' => {
-                let concat = format!("{}{}", result, nums[i + 1]);
-                result = concat.parse().unwrap();
+                let digits = (nums[i + 1] as f64).log10().floor() as u32 + 1;
+                result = result * 10_u64.pow(digits) + nums[i + 1];
             }
             _ => panic!("Unknown operator"),
         }
