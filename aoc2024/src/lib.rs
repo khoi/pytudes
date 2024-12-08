@@ -70,6 +70,12 @@ pub struct Point {
 }
 
 impl Point {
+    pub fn is_in_line(&self, other: &Point) -> bool {
+        self.x == other.x
+            || self.y == other.y
+            || (self.x - other.x).abs() == (self.y - other.y).abs()
+    }
+
     pub fn opposite(&self, other: &Point) -> Point {
         Point {
             x: other.x + (other.x - self.x),

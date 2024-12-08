@@ -12,6 +12,9 @@ help:  # Display this help.
 run: # Run all days
 	cargo run --bin aoc2024
 
+test: # Run all tests
+	cargo test
+
 clean: # Clean
 	cargo clean
 
@@ -59,4 +62,4 @@ test-day: # ie: make test-day day=1
 %:
 	@:
 
-.PHONY: run clean fetch-day run-day test-day help
+.PHONY: run clean fetch-day run-day test-day help test
