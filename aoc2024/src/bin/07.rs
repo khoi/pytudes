@@ -1,22 +1,6 @@
+use aoc2024::cartesian_product;
 use aoc2024::read_file_input;
 
-fn cartesian_product<T: Clone>(items: Vec<T>, repeat: usize) -> Vec<Vec<T>> {
-    if repeat == 0 {
-        return vec![vec![]];
-    }
-
-    let mut result = Vec::new();
-    let items_clone = items.clone();
-
-    for item in items {
-        for mut sub_product in cartesian_product(items_clone.clone(), repeat - 1) {
-            sub_product.insert(0, item.clone());
-            result.push(sub_product);
-        }
-    }
-
-    result
-}
 type Input = Vec<(u64, Vec<u64>)>;
 
 fn parse(input: &str) -> Input {

@@ -5,6 +5,45 @@ use std::{
     str::FromStr,
 };
 
+pub fn combinations<T: Clone>(items: Vec<T>, k: usize) -> Vec<Vec<T>> {
+    if k == 0 {
+        return vec![vec![]];
+    }
+    if k > items.len() {
+        return vec![];
+    }
+
+    let mut result = Vec::new();
+
+    for (i, item) in items.iter().enumerate() {
+        let remaining: Vec<T> = items[i + 1..].to_vec();
+        for mut combination in combinations(remaining, k - 1) {
+            combination.insert(0, item.clone());
+            result.push(combination);
+        }
+    }
+
+    result
+}
+
+pub fn cartesian_product<T: Clone>(items: Vec<T>, repeat: usize) -> Vec<Vec<T>> {
+    if repeat == 0 {
+        return vec![vec![]];
+    }
+
+    let mut result = Vec::new();
+    let items_clone = items.clone();
+
+    for item in items {
+        for mut sub_product in cartesian_product(items_clone.clone(), repeat - 1) {
+            sub_product.insert(0, item.clone());
+            result.push(sub_product);
+        }
+    }
+
+    result
+}
+
 pub fn read_file_input(day: u8) -> String {
     let cwd = env::current_dir().unwrap();
     let filepath = cwd.join("src/inputs").join(format!("{:02}.txt", day));
