@@ -192,6 +192,12 @@ mod tests {
         assert_eq!(fs.checksum(), 1928);
     }
 
+    #[test]
+    fn test_part1() {
+        let result = part1(parse(&read_file_input(9)));
+        assert_eq!(result, 6200294120911);
+    }
+
     // #[test]
     // fn test_2() {
     //     let result = part2(parse(INPUT));
