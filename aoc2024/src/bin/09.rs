@@ -251,4 +251,10 @@ mod tests {
         fs.defrag2();
         assert_eq!(fs.checksum(), 2858);
     }
+
+    #[test]
+    fn test_part2() {
+        let result = part2(parse(&read_file_input(9)));
+        assert_eq!(result, 6227018762750);
+    }
 }
