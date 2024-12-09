@@ -29,17 +29,62 @@ struct FS {
 
 impl FS {
     fn checksum(&self) -> usize {
-        let mut position = 0;
-        let mut sum = 0;
-        for (idx, entry) in self.entries.iter().enumerate() {
-            if let Entry::File(file) = entry {
-                for _ in 0..file.length {
-                    sum += file.id * position;
-                    position += 1;
+        self.entries
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, entry)| {
+                if let Entry::File(file) = entry {
+                    let start_pos = self.entries[..idx]
+                        .iter()
+                        .map(|e| match e {
+                            Entry::Free(size) | Entry::File(File { length: size, .. }) => *size,
+                        })
+                        .sum::<usize>();
+                    Some((0..file.length).map(move |offset| file.id * (start_pos + offset)))
+                } else {
+                    None
                 }
+            })
+            .flatten()
+            .sum()
+    }
+
+    fn defrag2(&mut self) {
+        let mut processed_ids = std::collections::HashSet::new();
+
+        for right in (0..self.entries.len()).rev() {
+            let Entry::File(file) = self.entries[right] else {
+                continue;
+            };
+
+            // Skip if we've already processed this file id
+            if processed_ids.contains(&file.id) {
+                continue;
+            }
+
+            processed_ids.insert(file.id);
+
+            // Find first suitable free space from left
+            let mut current_pos = 0;
+            while current_pos < right {
+                if let Entry::Free(size) = self.entries[current_pos] {
+                    if size >= file.length {
+                        self.entries[current_pos] = Entry::File(file);
+
+                        // Mark original position as free
+                        self.entries[right] = Entry::Free(file.length);
+
+                        // If there's remaining free space after moving file
+                        if size > file.length {
+                            self.entries
+                                .insert(current_pos + 1, Entry::Free(size - file.length));
+                        }
+                        break;
+                    }
+                }
+                current_pos += 1;
             }
         }
-        sum
     }
 
     fn defrag(&mut self) {
@@ -155,7 +200,9 @@ fn part1(input: Input) -> usize {
 }
 
 fn part2(input: Input) -> usize {
-    2
+    let mut fs = input.parse::<FS>().unwrap();
+    fs.defrag2();
+    fs.checksum()
 }
 
 fn main() {
@@ -198,9 +245,10 @@ mod tests {
         assert_eq!(result, 6200294120911);
     }
 
-    // #[test]
-    // fn test_2() {
-    //     let result = part2(parse(INPUT));
-    //     assert_eq!(result, 2);
-    // }
+    #[test]
+    fn test_2() {
+        let mut fs = INPUT.parse::<FS>().unwrap();
+        fs.defrag2();
+        assert_eq!(fs.checksum(), 2858);
+    }
 }
