@@ -1,3 +1,5 @@
+#![allow(warnings)]
+
 use aoc2024::read_file_input;
 
 type Input<'a> = &'a str;
