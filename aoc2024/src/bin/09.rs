@@ -40,7 +40,7 @@ impl FS {
                             Entry::Free(size) | Entry::File(File { length: size, .. }) => *size,
                         })
                         .sum::<usize>();
-                    Some((0..file.length).map(move |offset| file.id * (start_pos + offset)))
+                    Some((0..file.length).map(|offset| file.id * (start_pos + offset)))
                 } else {
                     None
                 }

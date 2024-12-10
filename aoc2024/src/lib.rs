@@ -197,6 +197,12 @@ impl<T> Grid<T> {
         &self.data[point.y as usize][point.x as usize]
     }
 
+    pub fn get_as_digit(&self, point: &Point) -> Option<u8> 
+    where T: std::convert::AsRef<char>
+    {
+        self.get(point).as_ref().to_digit(10).map(|d| d as u8)
+    }
+
     pub fn iter<'a>(&'a self, point: Point, direction: &'a Direction) -> GridIterator<T> {
         GridIterator {
             grid: self,
