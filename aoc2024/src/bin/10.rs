@@ -1,7 +1,5 @@
-#![allow(warnings)]
 use aoc2024::{read_file_input, Direction, Grid, Point};
-use std::cmp::Ordering;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::HashSet;
 use std::str::FromStr;
 
 type Input = Grid<char>;
