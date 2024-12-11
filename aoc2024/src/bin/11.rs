@@ -1,12 +1,6 @@
-#![allow(warnings)]
-
-use std::{
-    collections::{HashMap, HashSet},
-    ffi::c_longlong,
-};
+use std::collections::HashMap;
 
 use aoc2024::read_file_input;
-use nom::combinator::flat_map;
 
 type Input = HashMap<usize, usize>;
 
