@@ -1,28 +1,41 @@
 #![allow(warnings)]
 
+use std::{
+    collections::{HashMap, HashSet},
+    ffi::c_longlong,
+};
+
 use aoc2024::read_file_input;
 use nom::combinator::flat_map;
 
-type Input = Vec<usize>;
+type Input = HashMap<usize, usize>;
 
-fn blink(stones: &mut Vec<usize>, n: usize) {
-    for x in 0..n {
-        let mut i = 0;
-        while i < stones.len() {
-            if stones[i] == 0 {
-                stones[i] = 1;
-            } else if number_of_digits(stones[i]) % 2 == 0 {
-                let (lhs, rhs) = split_number_in_half(stones[i]);
-                stones.splice(i..=i, vec![lhs, rhs]);
-                i += 1;
-            } else {
-                stones[i] = stones[i] * 2024;
+fn blink(stones: &Input, n: usize) -> Input {
+    let mut current = stones.clone();
+
+    for _ in 0..n {
+        let mut next = HashMap::new();
+
+        for (&stone, &count) in current.iter() {
+            if count == 0 {
+                continue;
             }
 
-            i += 1;
+            if stone == 0 {
+                *next.entry(1).or_insert(0) += count;
+            } else if number_of_digits(stone) % 2 == 0 {
+                let (lhs, rhs) = split_number_in_half(stone);
+                *next.entry(lhs).or_insert(0) += count;
+                *next.entry(rhs).or_insert(0) += count;
+            } else {
+                *next.entry(stone * 2024).or_insert(0) += count;
+            }
         }
-        println!("{} - {:?}", x, stones);
+
+        current = next;
     }
+
+    current
 }
 
 fn split_number_in_half(n: usize) -> (usize, usize) {
@@ -41,28 +54,31 @@ fn number_of_digits(n: usize) -> usize {
 }
 
 fn parse(input: &str) -> Input {
-    input
+    let mut stones = HashMap::new();
+    for num in input
         .trim()
         .split_whitespace()
         .map(|s| s.parse::<usize>().unwrap())
-        .collect()
+    {
+        *stones.entry(num).or_insert(0) += 1;
+    }
+    stones
 }
 
-fn part1(input: &mut Input) -> usize {
-    blink(input, 25);
-    input.len()
+fn part1(input: Input) -> usize {
+    blink(&input, 25).values().sum()
 }
 
-fn part2(input: &Input) -> usize {
-    input.len()
+fn part2(input: Input) -> usize {
+    blink(&input, 75).values().sum()
 }
 
 fn main() {
     let input = read_file_input(11);
-    let mut parsed = parse(&input);
+    let parsed = parse(&input);
 
-    println!("{}", part1(&mut parsed));
-    println!("{}", part2(&parsed));
+    println!("{}", part1(parsed.clone()));
+    println!("{}", part2(parsed.clone()));
 }
 
 #[cfg(test)]
@@ -71,26 +87,15 @@ mod tests {
 
     #[test]
     fn test_six_blinks() {
-        let mut input = parse("125 17");
-        blink(&mut input, 6);
-        assert_eq!(
-            input,
-            vec![
-                2097446912, 14168, 4048, 2, 0, 2, 4, 40, 48, 2024, 40, 48, 80, 96, 2, 8, 6, 7, 6,
-                0, 3, 2
-            ]
-        );
+        let input = parse("125 17");
+        let res: usize = blink(&input, 6).values().sum();
+        assert_eq!(res, 22);
     }
 
     #[test]
     fn test_25_blinks() {
-        let mut input = parse("125 17");
-        blink(&mut input, 25);
-        assert_eq!(input.len(), 55312);
+        let input = parse("125 17");
+        let res: usize = blink(&input, 25).values().sum();
+        assert_eq!(res, 55312);
     }
-    // #[test]
-    // fn test_2() {
-    //     let result = part2(&parse(INPUT));
-    //     assert_eq!(result, 2);
-    // }
 }
