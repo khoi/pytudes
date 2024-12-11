@@ -33,6 +33,7 @@ fetch-day: # ie: make fetch-day day=1
 	@mkdir -p src/inputs
 	@padded_day=$$(printf "%02d" $(day)); \
 	aoc download -o -d $$padded_day -i src/inputs/$$padded_day.txt -p src/inputs/$$padded_day.md; \
+	cp src/bin/_template.rs src/bin/$$padded_day.rs; \
 	echo "Fetched day $$padded_day puzzle and input"
 
 run-day: # ie: make run-day day=1
