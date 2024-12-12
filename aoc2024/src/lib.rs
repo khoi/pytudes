@@ -1,6 +1,6 @@
 use std::{
     env,
-    fmt::{self},
+    fmt::{self, Display},
     fs,
     str::FromStr,
 };
@@ -80,6 +80,12 @@ pub struct Point {
     pub y: isize,
 }
 
+impl Display for Point {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+
 impl Point {
     pub fn opposite(&self, other: &Point) -> Point {
         Point {
@@ -94,6 +100,10 @@ impl Point {
 
     pub fn chebyshev_distance(&self, other: &Point) -> usize {
         ((self.x - other.x).abs().max((self.y - other.y).abs())) as usize
+    }
+
+    pub fn get_neighbors(&self, directions: &[Direction]) -> Vec<Point> {
+        directions.iter().map(|d| self.get_neighbor(d)).collect()
     }
 
     pub fn get_neighbor(&self, direction: &Direction) -> Point {
@@ -197,8 +207,9 @@ impl<T> Grid<T> {
         &self.data[point.y as usize][point.x as usize]
     }
 
-    pub fn get_as_digit(&self, point: &Point) -> Option<u8> 
-    where T: std::convert::AsRef<char>
+    pub fn get_as_digit(&self, point: &Point) -> Option<u8>
+    where
+        T: std::convert::AsRef<char>,
     {
         self.get(point).as_ref().to_digit(10).map(|d| d as u8)
     }
@@ -329,5 +340,29 @@ mod tests {
         let p2 = Point { x: -1, y: -1 };
         assert_eq!(p2.get_neighbor(&Direction::N), Point { x: -1, y: -2 });
         assert_eq!(p2.get_neighbor(&Direction::E), Point { x: 0, y: -1 });
+    }
+
+    #[test]
+    fn test_get_neighbors() {
+        let p = Point { x: 1, y: 1 };
+        let neighbors = p.get_neighbors(&[Direction::N, Direction::E, Direction::S, Direction::W]);
+        assert_eq!(
+            neighbors,
+            vec![
+                Point { x: 1, y: 0 }, // N
+                Point { x: 2, y: 1 }, // E
+                Point { x: 1, y: 2 }, // S
+                Point { x: 0, y: 1 }, // W
+            ]
+        );
+    }
+
+    #[test]
+    fn test_point_display() {
+        let p = Point { x: 1, y: 2 };
+        assert_eq!(p.to_string(), "(1, 2)");
+
+        let p2 = Point { x: -3, y: 4 };
+        assert_eq!(p2.to_string(), "(-3, 4)");
     }
 }
