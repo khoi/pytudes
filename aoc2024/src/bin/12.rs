@@ -38,12 +38,10 @@ fn count_similar_neighbors(grid: &Grid<char>, start: Point) -> Result {
             current.get_neighbors(&[Direction::N, Direction::E, Direction::S, Direction::W]);
 
         for neighbor in neighbors {
-            if grid.is_in_bound(&neighbor) {
-                if !visited.contains(&neighbor) && *grid.get(&neighbor) == target_char {
+            if grid.is_in_bound(&neighbor) && *grid.get(&neighbor) == target_char {
+                if !visited.contains(&neighbor) {
                     visited.insert(neighbor);
                     queue.push_back(neighbor);
-                } else if *grid.get(&neighbor) != target_char {
-                    perimeters.insert((current, neighbor));
                 }
             } else {
                 perimeters.insert((current, neighbor));
