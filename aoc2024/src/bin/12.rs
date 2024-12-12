@@ -3,9 +3,15 @@
 use std::{
     collections::{HashSet, VecDeque},
     str::FromStr,
+    thread::current,
 };
 
 use aoc2024::{read_file_input, Direction, Grid, Point};
+
+enum FenceOrientation {
+    Horizontal,
+    Vertical,
+}
 
 type Input = Grid<char>;
 
@@ -15,13 +21,13 @@ fn parse(input: &str) -> Input {
 
 struct Result {
     neighbors: HashSet<Point>,
-    perimeter: usize,
+    perimeters: HashSet<(Point, Point)>,
 }
 
 fn count_similar_neighbors(grid: &Grid<char>, start: Point) -> Result {
     let mut visited = HashSet::new();
     let mut queue = VecDeque::new();
-    let mut perimeter = 0;
+    let mut perimeters: HashSet<(Point, Point)> = HashSet::new();
     let target_char = *grid.get(&start);
 
     visited.insert(start);
@@ -37,17 +43,17 @@ fn count_similar_neighbors(grid: &Grid<char>, start: Point) -> Result {
                     visited.insert(neighbor);
                     queue.push_back(neighbor);
                 } else if *grid.get(&neighbor) != target_char {
-                    perimeter += 1;
+                    perimeters.insert((current, neighbor));
                 }
             } else {
-                perimeter += 1;
+                perimeters.insert((current, neighbor));
             }
         }
     }
 
     Result {
         neighbors: visited,
-        perimeter,
+        perimeters,
     }
 }
 
@@ -59,7 +65,7 @@ fn part1(input: Input) -> usize {
         if !evaluated.contains(&point) {
             let result = count_similar_neighbors(&input, point);
             evaluated.extend(result.neighbors.iter());
-            let score = result.perimeter * result.neighbors.len();
+            let score = result.perimeters.len() * result.neighbors.len();
             total_score += score;
         }
     }
@@ -109,10 +115,10 @@ OOOOO
         let result = part1(parse(INPUT2));
         assert_eq!(result, 772);
     }
-    //
-    // #[test]
-    // fn test_2() {
-    //     let result = part2(parse(INPUT));
-    //     assert_eq!(result, 2);
-    // }
+
+    #[test]
+    fn test_2() {
+        let result = part2(parse(INPUT));
+        assert_eq!(result, 2);
+    }
 }
