@@ -91,11 +91,19 @@ fn part1(input: Input) -> usize {
 }
 
 fn part2(input: Input) -> usize {
-    for second in 1..=1000000 {
-        if second % 1000 == 0 {
-            println!("Second: {}", second);
+    let mut grid = Grid {
+        width: 101,
+        height: 103,
+        data: vec![vec![0; 101]; 103],
+    };
+    let mut robots = input;
+
+    for i in 0..10000 {
+        simulate_robots(&mut robots, &mut grid);
+        let occupied = grid.data.iter().flatten().filter(|&&c| c > 0).count();
+        if occupied == 500 {
+            return i + 1;
         }
-        let robot_count = input.len();
     }
     0
 }
