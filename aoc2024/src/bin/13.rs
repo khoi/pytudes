@@ -1,5 +1,3 @@
-#![allow(warnings)]
-
 use aoc2024::read_file_input;
 
 #[derive(Debug, Clone, Copy)]
@@ -163,10 +161,4 @@ Prize: X=18641, Y=10279
         let result = part1(parse(INPUT));
         assert_eq!(result, 480);
     }
-
-    // #[test]
-    // fn test_2() {
-    //     let result = part2(parse(INPUT));
-    //     assert_eq!(result, 2);
-    // }
 }
