@@ -1,5 +1,3 @@
-#![allow(warnings)]
-
 use aoc2024::{read_file_input, Grid, Point};
 
 #[derive(Debug, Clone, Copy)]
@@ -33,40 +31,47 @@ fn parse(input: &str) -> Input {
         .collect()
 }
 
-fn simulate_robots(mut robots: Input, seconds: usize, width: usize, height: usize) -> usize {
-    let mut data: Grid<usize> = Grid {
-        width,
-        height,
-        data: vec![vec![0; width]; height],
-    };
+fn simulate_robots(robots: &mut Input, grid: &mut Grid<usize>) {
+    for robot in robots.iter_mut() {
+        // Update position
+        robot.pos.x += robot.vel_x;
+        robot.pos.y += robot.vel_y;
 
-    // Simulate robot movement
-    for _ in 0..seconds {
-        for robot in &mut robots {
-            // Update position
-            robot.pos.x += robot.vel_x;
-            robot.pos.y += robot.vel_y;
-
-            // Wrap positions
-            robot.pos.x = robot.pos.x.rem_euclid(data.width as isize);
-            robot.pos.y = robot.pos.y.rem_euclid(data.height as isize);
-        }
+        // Wrap positions
+        robot.pos.x = robot.pos.x.rem_euclid(grid.width as isize);
+        robot.pos.y = robot.pos.y.rem_euclid(grid.height as isize);
     }
 
+    // Reset grid
+    grid.data = vec![vec![0; grid.width]; grid.height];
+
     // Count robots at each position
-    for robot in &robots {
+    for robot in robots.iter_mut() {
         let x = robot.pos.x as usize;
         let y = robot.pos.y as usize;
-        data.data[y][x] += 1;
+        grid.data[y][x] += 1;
+    }
+}
+
+fn part1(input: Input) -> usize {
+    let mut grid = Grid {
+        width: 101,
+        height: 103,
+        data: vec![vec![0; 101]; 103],
+    };
+    let mut robots = input;
+
+    for _ in 0..100 {
+        simulate_robots(&mut robots, &mut grid);
     }
 
     // Count robots in each quadrant
     let mut quadrant_counts = [0; 4];
-    let mid_x = (data.width / 2) as isize;
-    let mid_y = (data.height / 2) as isize;
+    let mid_x = (grid.width / 2) as isize;
+    let mid_y = (grid.height / 2) as isize;
 
-    for point in data.points() {
-        let robo_count = data.get(&point);
+    for point in grid.points() {
+        let robo_count = grid.get(&point);
         if *robo_count > 0 {
             if point.x == mid_x || point.y == mid_y {
                 continue;
@@ -82,15 +87,17 @@ fn simulate_robots(mut robots: Input, seconds: usize, width: usize, height: usiz
         }
     }
 
-    quadrant_counts.iter().product()
-}
-
-fn part1(input: Input) -> usize {
-    simulate_robots(input, 100, 101, 103)
+    quadrant_counts.iter().product::<usize>()
 }
 
 fn part2(input: Input) -> usize {
-    input.len()
+    for second in 1..=1000000 {
+        if second % 1000 == 0 {
+            println!("Second: {}", second);
+        }
+        let robot_count = input.len();
+    }
+    0
 }
 
 fn main() {
@@ -123,8 +130,40 @@ p=9,5 v=-3,-3
 
     #[test]
     fn test_part1_example() {
-        let result = simulate_robots(parse(INPUT), 100, 11, 7);
-        assert_eq!(result, 12);
+        let mut grid = Grid {
+            width: 11,
+            height: 7,
+            data: vec![vec![0; 11]; 7],
+        };
+        let mut robots = parse(INPUT);
+
+        for _ in 0..100 {
+            simulate_robots(&mut robots, &mut grid);
+        }
+
+        // Count robots in each quadrant
+        let mut quadrant_counts = [0; 4];
+        let mid_x = (grid.width / 2) as isize;
+        let mid_y = (grid.height / 2) as isize;
+
+        for point in grid.points() {
+            let robo_count = grid.get(&point);
+            if *robo_count > 0 {
+                if point.x == mid_x || point.y == mid_y {
+                    continue;
+                }
+                let quadrant = match (point.x, point.y) {
+                    (x, y) if x < mid_x && y < mid_y => 0,
+                    (x, y) if x > mid_x && y < mid_y => 1,
+                    (x, y) if x < mid_x && y > mid_y => 2,
+                    (x, y) if x > mid_x && y > mid_y => 3,
+                    _ => panic!("Unexpected point {}", point),
+                };
+                quadrant_counts[quadrant] += robo_count;
+            }
+        }
+
+        assert_eq!(quadrant_counts.iter().product::<usize>(), 12);
     }
 
     #[test]
@@ -133,10 +172,4 @@ p=9,5 v=-3,-3
         let result = part1(input);
         assert_eq!(result, 224438715);
     }
-
-    // #[test]
-    // fn test_2() {
-    //     let result = part2(parse(INPUT));
-    //     assert_eq!(result, 2);
-    // }
 }
