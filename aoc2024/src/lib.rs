@@ -151,7 +151,7 @@ pub struct Grid<T> {
     pub data: Vec<Vec<T>>,
 }
 
-impl fmt::Debug for Grid<char> {
+impl<T: fmt::Debug> fmt::Debug for Grid<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Print column headers
         write!(f, "  |")?;
@@ -167,8 +167,8 @@ impl fmt::Debug for Grid<char> {
         // Print each row with row numbers
         for (y, line) in self.data.iter().enumerate() {
             write!(f, "{:>2}|", y)?;
-            for c in line.iter() {
-                write!(f, " {}", c)?;
+            for val in line.iter() {
+                write!(f, " {:?}", val)?;
             }
             writeln!(f)?;
         }
@@ -176,7 +176,7 @@ impl fmt::Debug for Grid<char> {
     }
 }
 
-impl fmt::Display for Grid<char> {
+impl<T: fmt::Display> fmt::Display for Grid<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for line in self.data.iter() {
             for c in line.iter() {
