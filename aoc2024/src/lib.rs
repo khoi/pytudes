@@ -156,7 +156,7 @@ impl<T: fmt::Debug> fmt::Debug for Grid<T> {
         // Print column headers
         write!(f, "  |")?;
         for x in 0..self.width {
-            write!(f, " {}", x)?;
+            write!(f, " {:>2} ", x)?;
         }
         writeln!(f)?;
 
