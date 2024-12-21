@@ -87,34 +87,6 @@ fn dijkstra(grid: &Grid<char>, start: Point) -> HashMap<Point, State> {
     states
 }
 
-fn shortest_path(states: &HashMap<Point, State>, start: Point, end: Point) -> Vec<Point> {
-    let mut path = vec![];
-    let mut current = end;
-    while current != start {
-        let current_state = states[&current];
-        let mut next_point = None;
-
-        for dir in [Direction::N, Direction::E, Direction::S, Direction::W] {
-            let neighbor = current.get_neighbor(&dir);
-            if let Some(state) = states.get(&neighbor) {
-                if state.distance < current_state.distance {
-                    next_point = Some(neighbor);
-                    break;
-                }
-            }
-        }
-
-        if let Some(next) = next_point {
-            path.push(next);
-            current = next;
-        } else {
-            break;
-        }
-    }
-
-    path
-}
-
 fn parse(input: &str) -> Input {
     input.trim().parse().unwrap()
 }
@@ -134,7 +106,6 @@ fn part1(input: Input) -> usize {
     let start = start.expect("No start point found");
     let end = end.expect("No end point found");
     let states = dijkstra(&input, start);
-    let path = shortest_path(&states, start, end);
 
     // Return the distance to the end point
     states[&end].distance
