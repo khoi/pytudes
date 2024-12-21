@@ -1,9 +1,7 @@
-#![allow(warnings)]
-
 use aoc2024::read_file_input;
 use aoc2024::{Direction, Grid, Point};
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 
 type Input = Grid<char>;
 
@@ -31,14 +29,18 @@ struct State {
     distance: usize,
 }
 
-fn dijkstra(grid: &Grid<char>, start: Point) -> HashMap<Point, State> {
+fn dijkstra(
+    grid: &Grid<char>,
+    start: Point,
+    initial_direction: Direction,
+) -> HashMap<Point, State> {
     let mut states: HashMap<Point, State> = HashMap::new();
     let mut heap = BinaryHeap::new();
 
     states.insert(
         start,
         State {
-            direction: Direction::E,
+            direction: initial_direction,
             distance: 0,
         },
     );
@@ -105,14 +107,48 @@ fn part1(input: Input) -> usize {
 
     let start = start.expect("No start point found");
     let end = end.expect("No end point found");
-    let states = dijkstra(&input, start);
-
-    // Return the distance to the end point
+    let states = dijkstra(&input, start, Direction::E);
     states[&end].distance
 }
 
 fn part2(input: Input) -> usize {
-    2
+    let mut start = None;
+    let mut end = None;
+
+    for p in input.points() {
+        match input.get(&p) {
+            'S' => start = Some(p),
+            'E' => end = Some(p),
+            _ => continue,
+        }
+    }
+
+    let start = start.expect("No start point found");
+    let end = end.expect("No end point found");
+    let from_start = dijkstra(&input, start, Direction::E);
+
+    let mut good_seats = HashSet::new();
+    let from_ends: HashMap<Direction, HashMap<Point, State>> =
+        [Direction::N, Direction::E, Direction::S, Direction::W]
+            .iter()
+            .map(|dir| (*dir, dijkstra(&input, end, *dir)))
+            .collect();
+
+    for p in input.points() {
+        if input.is_in_bound(&p) && input.get(&p) == &'#' {
+            continue;
+        }
+
+        for dir in [Direction::N, Direction::E, Direction::S, Direction::W] {
+            if from_start[&p].distance + from_ends[&flip(dir)][&p].distance
+                == from_start[&end].distance
+            {
+                good_seats.insert(p);
+            }
+        }
+    }
+
+    good_seats.len()
 }
 
 fn main() {
@@ -123,14 +159,28 @@ fn main() {
     println!("{}", part2(parsed.clone()));
 }
 
-fn is_90_degree_turn(prev: Direction, new: Direction) -> bool {
-    match (prev, new) {
-        (Direction::N, Direction::E) | (Direction::E, Direction::N) => true,
-        (Direction::N, Direction::W) | (Direction::W, Direction::N) => true,
-        (Direction::S, Direction::E) | (Direction::E, Direction::S) => true,
-        (Direction::S, Direction::W) | (Direction::W, Direction::S) => true,
-        _ => false,
+fn flip(dir: Direction) -> Direction {
+    match dir {
+        Direction::N => Direction::S,
+        Direction::S => Direction::N,
+        Direction::E => Direction::W,
+        Direction::W => Direction::E,
+        _ => panic!("Invalid direction"),
     }
+}
+
+fn is_90_degree_turn(prev: Direction, new: Direction) -> bool {
+    matches!(
+        (prev, new),
+        (Direction::N, Direction::E)
+            | (Direction::E, Direction::N)
+            | (Direction::N, Direction::W)
+            | (Direction::W, Direction::N)
+            | (Direction::S, Direction::E)
+            | (Direction::E, Direction::S)
+            | (Direction::S, Direction::W)
+            | (Direction::W, Direction::S)
+    )
 }
 
 #[cfg(test)]
@@ -162,6 +212,6 @@ mod tests {
     #[test]
     fn test_2() {
         let result = part2(parse(INPUT));
-        assert_eq!(result, 2);
+        assert_eq!(result, 45);
     }
 }
