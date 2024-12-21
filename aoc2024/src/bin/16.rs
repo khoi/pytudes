@@ -35,10 +35,13 @@ fn dijkstra(grid: &Grid<char>, start: Point) -> HashMap<Point, State> {
     let mut states: HashMap<Point, State> = HashMap::new();
     let mut heap = BinaryHeap::new();
 
-    states.insert(start, State {
-        direction: Direction::E,
-        distance: 0,
-    });
+    states.insert(
+        start,
+        State {
+            direction: Direction::E,
+            distance: 0,
+        },
+    );
     heap.push(Reverse(Vertex {
         point: start,
         distance: 0,
@@ -66,10 +69,13 @@ fn dijkstra(grid: &Grid<char>, start: Point) -> HashMap<Point, State> {
             };
 
             if should_update {
-                states.insert(neighbor, State {
-                    direction: *dir,
-                    distance: new_dist,
-                });
+                states.insert(
+                    neighbor,
+                    State {
+                        direction: *dir,
+                        distance: new_dist,
+                    },
+                );
                 heap.push(Reverse(Vertex {
                     point: neighbor,
                     distance: new_dist,
