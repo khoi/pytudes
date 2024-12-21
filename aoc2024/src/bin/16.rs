@@ -49,10 +49,11 @@ fn dijkstra(
         distance: 0,
     }));
 
-    let directions = [Direction::N, Direction::E, Direction::S, Direction::W];
+    //
     while let Some(Reverse(current)) = heap.pop() {
         let current_state = states[&current.point];
-        for dir in &directions {
+
+        for dir in &[Direction::N, Direction::E, Direction::S, Direction::W] {
             let neighbor = current.point.get_neighbor(dir);
             if !grid.is_in_bound(&neighbor) || grid.get(&neighbor) == &'#' {
                 continue;
