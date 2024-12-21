@@ -27,42 +27,36 @@ impl PartialOrd for Vertex {
 
 fn dijkstra(grid: &Grid<char>, start: Point) -> HashMap<Point, usize> {
     let mut distances: HashMap<Point, usize> = HashMap::new();
+    let mut prev_directions: HashMap<Point, Direction> = HashMap::new();
     let mut heap = BinaryHeap::new();
 
-    // Initialize distances with infinity except for start
     distances.insert(start, 0);
     heap.push(Reverse(Vertex {
         point: start,
-        distance: 0,
+        distance: 1,
     }));
+    prev_directions.insert(start, Direction::E);
 
-    // Main directions for movement
     let directions = [Direction::N, Direction::E, Direction::S, Direction::W];
-
     while let Some(Reverse(current)) = heap.pop() {
         let current_dist = distances[&current.point];
-
-        // Skip if we've found a better path
-        if current.distance > current_dist {
-            continue;
-        }
-
-        // Get valid neighbors
         for dir in &directions {
             let neighbor = current.point.get_neighbor(dir);
-
-            // Skip if out of bounds or wall
             if !grid.is_in_bound(&neighbor) || grid.get(&neighbor) == &'#' {
                 continue;
             }
 
-            // Calculate new distance
-            let new_dist = current_dist + 1;
+            let move_cost = match prev_directions.get(&current.point) {
+                Some(&prev_dir) if is_90_degree_turn(prev_dir, *dir) => 1001,
+                Some(_) => 1,
+                None => panic!("Impossible case: no previous direction found"),
+            };
+            let new_dist = current_dist + move_cost;
 
-            // Update distance if it's better
             let entry = distances.entry(neighbor).or_insert(usize::MAX);
             if new_dist < *entry {
                 *entry = new_dist;
+                prev_directions.insert(neighbor, *dir);
                 heap.push(Reverse(Vertex {
                     point: neighbor,
                     distance: new_dist,
@@ -72,6 +66,40 @@ fn dijkstra(grid: &Grid<char>, start: Point) -> HashMap<Point, usize> {
     }
 
     distances
+}
+
+fn shortest_path(distance: &HashMap<Point, usize>, start: Point, end: Point) -> Vec<Point> {
+    let mut path = vec![];
+    let mut current = end;
+    while current != start {
+        let current_dist = distance[&current];
+        let mut next_point = None;
+        let mut next_dir = None;
+
+        for dir in [Direction::N, Direction::E, Direction::S, Direction::W] {
+            let neighbor = current.get_neighbor(&dir);
+            if !distance.contains_key(&neighbor) {
+                continue;
+            }
+
+            if let Some(&dist) = distance.get(&neighbor) {
+                if dist < current_dist {
+                    next_point = Some(neighbor);
+                    next_dir = Some(dir);
+                    break;
+                }
+            }
+        }
+
+        if let Some(next) = next_point {
+            path.push(next);
+            current = next;
+        } else {
+            break;
+        }
+    }
+
+    path
 }
 
 fn parse(input: &str) -> Input {
@@ -92,67 +120,11 @@ fn part1(input: Input) -> usize {
 
     let start = start.expect("No start point found");
     let end = end.expect("No end point found");
-    println!("{:?}", input);
-    println!("Start: {:?}", start);
-    println!("End: {:?}", end);
-
     let distances = dijkstra(&input, start);
+    let path = shortest_path(&distances, start, end);
 
-    // Create a grid for path visualization
-    let mut path_grid = Grid {
-        width: input.width,
-        height: input.height,
-        data: vec![vec!['.'; input.width]; input.height],
-    };
-
-    // Copy walls from input grid
-    for p in input.points() {
-        if input.get(&p) == &'#' {
-            path_grid.data[p.y as usize][p.x as usize] = '#';
-        }
-    }
-
-    // Start from end and work backwards
-    let mut current = end;
-    while current != start {
-        let current_dist = distances[&current];
-        let mut next_point = None;
-        let mut next_dir = None;
-
-        // Check all neighbors
-        for dir in [Direction::N, Direction::E, Direction::S, Direction::W] {
-            let neighbor = current.get_neighbor(&dir);
-            if !input.is_in_bound(&neighbor) {
-                continue;
-            }
-
-            if let Some(&dist) = distances.get(&neighbor) {
-                if dist < current_dist {
-                    next_point = Some(neighbor);
-                    next_dir = Some(dir);
-                    break;
-                }
-            }
-        }
-
-        // Place distance score
-        path_grid.data[current.y as usize][current.x as usize] =
-            std::char::from_digit(current_dist as u32 % 10, 10).unwrap_or('.');
-
-        if let Some(next) = next_point {
-            current = next;
-        } else {
-            break;
-        }
-    }
-
-    // Mark start and end points
-    path_grid.data[start.y as usize][start.x as usize] = 'S';
-    path_grid.data[end.y as usize][end.x as usize] = 'E';
-
-    println!("{:?}", path_grid);
-
-    *distances.get(&end).unwrap_or(&0)
+    // Return the distance to the end point
+    distances[&end]
 }
 
 fn part2(input: Input) -> usize {
@@ -200,7 +172,7 @@ mod tests {
     #[test]
     fn test_1() {
         let result = part1(parse(INPUT));
-        assert_eq!(result, 1);
+        assert_eq!(result, 7036);
     }
 
     #[test]
