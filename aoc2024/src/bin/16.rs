@@ -25,38 +25,51 @@ impl PartialOrd for Vertex {
     }
 }
 
-fn dijkstra(grid: &Grid<char>, start: Point) -> HashMap<Point, usize> {
-    let mut distances: HashMap<Point, usize> = HashMap::new();
-    let mut prev_directions: HashMap<Point, Direction> = HashMap::new();
+#[derive(Debug, Clone, Copy)]
+struct State {
+    direction: Direction,
+    distance: usize,
+}
+
+fn dijkstra(grid: &Grid<char>, start: Point) -> HashMap<Point, State> {
+    let mut states: HashMap<Point, State> = HashMap::new();
     let mut heap = BinaryHeap::new();
 
-    distances.insert(start, 0);
+    states.insert(start, State {
+        direction: Direction::E,
+        distance: 0,
+    });
     heap.push(Reverse(Vertex {
         point: start,
-        distance: 1,
+        distance: 0,
     }));
-    prev_directions.insert(start, Direction::E);
 
     let directions = [Direction::N, Direction::E, Direction::S, Direction::W];
     while let Some(Reverse(current)) = heap.pop() {
-        let current_dist = distances[&current.point];
+        let current_state = states[&current.point];
         for dir in &directions {
             let neighbor = current.point.get_neighbor(dir);
             if !grid.is_in_bound(&neighbor) || grid.get(&neighbor) == &'#' {
                 continue;
             }
 
-            let move_cost = match prev_directions.get(&current.point) {
-                Some(&prev_dir) if is_90_degree_turn(prev_dir, *dir) => 1001,
-                Some(_) => 1,
-                None => panic!("Impossible case: no previous direction found"),
+            let move_cost = if is_90_degree_turn(current_state.direction, *dir) {
+                1001
+            } else {
+                1
             };
-            let new_dist = current_dist + move_cost;
+            let new_dist = current_state.distance + move_cost;
 
-            let entry = distances.entry(neighbor).or_insert(usize::MAX);
-            if new_dist < *entry {
-                *entry = new_dist;
-                prev_directions.insert(neighbor, *dir);
+            let should_update = match states.get(&neighbor) {
+                Some(state) => new_dist < state.distance,
+                None => true,
+            };
+
+            if should_update {
+                states.insert(neighbor, State {
+                    direction: *dir,
+                    distance: new_dist,
+                });
                 heap.push(Reverse(Vertex {
                     point: neighbor,
                     distance: new_dist,
@@ -65,27 +78,21 @@ fn dijkstra(grid: &Grid<char>, start: Point) -> HashMap<Point, usize> {
         }
     }
 
-    distances
+    states
 }
 
-fn shortest_path(distance: &HashMap<Point, usize>, start: Point, end: Point) -> Vec<Point> {
+fn shortest_path(states: &HashMap<Point, State>, start: Point, end: Point) -> Vec<Point> {
     let mut path = vec![];
     let mut current = end;
     while current != start {
-        let current_dist = distance[&current];
+        let current_state = states[&current];
         let mut next_point = None;
-        let mut next_dir = None;
 
         for dir in [Direction::N, Direction::E, Direction::S, Direction::W] {
             let neighbor = current.get_neighbor(&dir);
-            if !distance.contains_key(&neighbor) {
-                continue;
-            }
-
-            if let Some(&dist) = distance.get(&neighbor) {
-                if dist < current_dist {
+            if let Some(state) = states.get(&neighbor) {
+                if state.distance < current_state.distance {
                     next_point = Some(neighbor);
-                    next_dir = Some(dir);
                     break;
                 }
             }
@@ -120,11 +127,11 @@ fn part1(input: Input) -> usize {
 
     let start = start.expect("No start point found");
     let end = end.expect("No end point found");
-    let distances = dijkstra(&input, start);
-    let path = shortest_path(&distances, start, end);
+    let states = dijkstra(&input, start);
+    let path = shortest_path(&states, start, end);
 
     // Return the distance to the end point
-    distances[&end]
+    states[&end].distance
 }
 
 fn part2(input: Input) -> usize {
