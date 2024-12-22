@@ -55,7 +55,7 @@ struct Computer {
     register_a: isize,
     register_b: isize,
     register_c: isize,
-    instruction_ptr: usize,
+    instruction_ptr: isize,
     program: Vec<u8>,
 }
 
@@ -71,17 +71,17 @@ impl Computer {
     }
 
     fn is_halted(&self) -> bool {
-        self.instruction_ptr >= self.program.len()
+        self.instruction_ptr >= self.program.len() as isize
     }
 
     fn execute(&mut self) -> Vec<isize> {
         let mut output = Vec::new();
 
         while !self.is_halted() {
-            let opcode = self.program[self.instruction_ptr];
+            let opcode = self.program[self.instruction_ptr as usize];
             let operand = self
                 .program
-                .get(self.instruction_ptr + 1)
+                .get((self.instruction_ptr + 1) as usize)
                 .expect("Missing operand");
             let instruction = Instruction::from_opcode(opcode).unwrap();
             let operand = match instruction {
@@ -102,7 +102,7 @@ impl Computer {
 
             match instruction {
                 Instruction::Adv => {
-                    self.register_a /= 1 << operand_value;
+                    self.register_a >>= operand_value;
                 }
                 Instruction::Bxl => {
                     self.register_b ^= operand_value;
@@ -112,8 +112,7 @@ impl Computer {
                 }
                 Instruction::Jnz => {
                     if self.register_a != 0 {
-                        self.instruction_ptr = operand_value as usize;
-                        continue;
+                        self.instruction_ptr = operand_value - 2;
                     }
                 }
                 Instruction::Bxc => {
@@ -123,10 +122,10 @@ impl Computer {
                     output.push(operand_value % 8);
                 }
                 Instruction::Bdv => {
-                    self.register_b = self.register_a / (1 << operand_value);
+                    self.register_b = self.register_a >> operand_value;
                 }
                 Instruction::Cdv => {
-                    self.register_c = self.register_a / (1 << operand_value);
+                    self.register_c = self.register_a >> operand_value;
                 }
             }
 
