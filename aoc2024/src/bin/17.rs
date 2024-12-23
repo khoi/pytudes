@@ -85,7 +85,11 @@ impl Computer {
                 .expect("Missing operand");
             let instruction = Instruction::from_opcode(opcode).unwrap();
             let operand = match instruction {
-                Instruction::Adv | Instruction::Bst | Instruction::Out => Operand::Combo(*operand),
+                Instruction::Adv
+                | Instruction::Bst
+                | Instruction::Out
+                | Instruction::Bdv
+                | Instruction::Cdv => Operand::Combo(*operand),
                 _ => Operand::Literal(*operand),
             };
 
@@ -169,7 +173,6 @@ fn parse(input: &str) -> Computer {
 }
 
 fn part1(mut computer: Computer) -> String {
-    println!("{:?}", computer);
     let result = computer.execute();
     result
         .into_iter()
@@ -179,7 +182,21 @@ fn part1(mut computer: Computer) -> String {
 }
 
 fn part2(computer: Computer) -> usize {
-    2
+    let expected_output: Vec<isize> = computer.program.iter().map(|&x| x as isize).collect();
+
+    for i in 0..=10000000000000000 {
+        if i % 100000 == 0 {
+            println!("Trying A={}", i);
+        }
+        let mut new_computer = computer.clone();
+        new_computer.register_a = i;
+
+        if new_computer.execute() == expected_output {
+            return i as usize;
+        }
+    }
+
+    0
 }
 
 fn main() {
