@@ -102,6 +102,13 @@ impl Display for Point {
 }
 
 impl Point {
+    pub fn new(x: usize, y: usize) -> Point {
+        Point {
+            x: x as isize,
+            y: y as isize,
+        }
+    }
+
     pub fn opposite(&self, other: &Point) -> Point {
         Point {
             x: other.x + (other.x - self.x),
