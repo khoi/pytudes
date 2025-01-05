@@ -58,8 +58,47 @@ fn part1(graph: Graph) -> usize {
         .count()
 }
 
-fn part2(graph: Graph) -> usize {
-    0 // Not implemented yet
+fn is_connected_to_all(node: &str, clique: &HashSet<String>, graph: &Graph) -> bool {
+    clique.iter().all(|member| graph[node].contains(member))
+}
+
+fn extend_clique(
+    node_idx: usize,
+    nodes: &[String],
+    current: &mut HashSet<String>,
+    best: &mut HashSet<String>,
+    graph: &Graph,
+) {
+    if current.len() > best.len() {
+        *best = current.clone();
+    }
+
+    for i in node_idx..nodes.len() {
+        let candidate = &nodes[i];
+        if is_connected_to_all(candidate, current, graph) {
+            current.insert(candidate.clone());
+            extend_clique(i + 1, nodes, current, best, graph);
+            current.remove(candidate);
+        }
+    }
+}
+
+fn find_max_clique(graph: &Graph) -> HashSet<String> {
+    let mut best_clique = HashSet::new();
+    let mut current_clique = HashSet::new();
+    let mut nodes: Vec<_> = graph.keys().cloned().collect();
+    // Sort by number of connections (most connected first) for better pruning
+    nodes.sort_by_key(|n| std::cmp::Reverse(graph[n].len()));
+
+    extend_clique(0, &nodes, &mut current_clique, &mut best_clique, graph);
+    best_clique
+}
+
+fn part2(graph: Graph) -> String {
+    let clique = find_max_clique(&graph);
+    let mut members: Vec<_> = clique.into_iter().collect();
+    members.sort();
+    members.join(",")
 }
 
 fn main() {
@@ -114,9 +153,9 @@ td-yn";
         assert_eq!(result, 7);
     }
 
-    // #[test]
-    // fn test_2() {
-    //     let result = part2(parse(INPUT));
-    //     assert_eq!(result, 0);
-    // }
+    #[test]
+    fn test_2() {
+        let result = part2(parse(INPUT));
+        assert_eq!(result, "co,de,ka,ta");
+    }
 }
