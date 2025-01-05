@@ -82,7 +82,6 @@ fn find_cheat_paths(grid: &Grid<char>, start: Point, max_steps: usize) -> Vec<(P
     let mut queue = VecDeque::new();
     let mut visited = HashSet::new();
 
-    // (position, steps_taken)
     queue.push_back((start, 0));
     visited.insert(start);
 
@@ -153,16 +152,12 @@ fn find_all_cheats(
     let mut cheats = Vec::new();
     let mut seen_pairs = HashSet::new();
 
-    // Pre-calculate distances from start and end
     let start_distances = DistanceMap::new(&input.grid, input.start);
     let end_distances = DistanceMap::new(&input.grid, input.end);
 
-    // Get normal path length once
     let normal_path_length = start_distances
         .get_distance(&input.end)
         .unwrap_or(usize::MAX);
-
-    // Find potential starting points (track tiles next to walls)
     let potential_starts: Vec<Point> = input
         .grid
         .points()
@@ -179,7 +174,6 @@ fn find_all_cheats(
         let paths = find_cheat_paths(&input.grid, start, max_steps);
 
         for (end, steps) in paths {
-            // Only consider unique start-end pairs
             if !seen_pairs.insert((start, end)) {
                 continue;
             }
