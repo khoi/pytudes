@@ -1,5 +1,3 @@
-#![allow(warnings)]
-
 use aoc2024::{read_file_input, Direction, Grid, Point};
 use std::collections::{HashMap, HashSet, VecDeque};
 
@@ -74,16 +72,14 @@ fn part2(input: Input) -> (usize, usize) {
     let max_x = input.iter().map(|[x, _]| x).max().unwrap();
     let max_y = input.iter().map(|[_, y]| y).max().unwrap();
 
-    for i in 0..input.len() {
-        let mut grid = Grid {
-            width: max_x + 1,
-            height: max_y + 1,
-            data: vec![vec!['.'; max_x + 1]; max_y + 1],
-        };
+    let mut grid = Grid {
+        width: max_x + 1,
+        height: max_y + 1,
+        data: vec![vec!['.'; max_x + 1]; max_y + 1],
+    };
 
-        for [x, y] in input.iter().take(i) {
-            grid.data[*y][*x] = '#';
-        }
+    for [x, y] in &input {
+        grid.data[*y][*x] = '#';
 
         let start = Point { x: 0, y: 0 };
         let end = Point {
@@ -93,7 +89,7 @@ fn part2(input: Input) -> (usize, usize) {
         let shortest_path = find_shortest_path(&grid, start, end);
 
         if shortest_path == 0 {
-            return (input[i - 1][0], input[i - 1][1]);
+            return (*x, *y);
         }
     }
     panic!()
@@ -138,15 +134,29 @@ mod tests {
 1,6
 2,0";
 
-    // #[test]
-    // fn test_example_1() {
-    //     let result = part1(parse(INPUT), 12);
-    //     assert_eq!(result, 22);
-    // }
+    #[test]
+    fn test_example_1() {
+        let result = part1(parse(INPUT), 12);
+        assert_eq!(result, 22);
+    }
 
     #[test]
     fn test_example_2() {
         let result = part2(parse(INPUT));
         assert_eq!(result, (6, 1));
     }
+
+    // #[test]
+    // fn test_1() {
+    //     let input = read_file_input(18);
+    //     let result = part1(parse(&input), 1024);
+    //     assert_eq!(result, 322);
+    // }
+    //
+    // #[test]
+    // fn test_2() {
+    //     let input = read_file_input(18);
+    //     let result = part2(parse(&input));
+    //     assert_eq!(result, (60, 21));
+    // }
 }
