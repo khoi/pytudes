@@ -77,14 +77,44 @@ impl DistanceMap {
     }
 }
 
-fn is_valid_cheat(grid: &Grid<char>, p1: &Point, p2: &Point) -> bool {
-    grid.is_in_bound(p1) && grid.is_in_bound(p2) && *grid.get(p1) == '#' && is_track(grid.get(p2))
+fn find_cheat_paths(grid: &Grid<char>, start: Point, max_steps: usize) -> Vec<(Point, usize)> {
+    let mut result = Vec::new();
+    let mut queue = VecDeque::new();
+    let mut visited = HashSet::new();
+
+    // (position, steps_taken)
+    queue.push_back((start, 0));
+    visited.insert(start);
+
+    while let Some((pos, steps)) = queue.pop_front() {
+        if steps > 0 && is_track(grid.get(&pos)) {
+            result.push((pos, steps));
+        }
+
+        if steps >= max_steps {
+            continue;
+        }
+
+        for dir in [Direction::N, Direction::E, Direction::S, Direction::W] {
+            let next = pos.get_neighbor(&dir);
+            if grid.is_in_bound(&next)
+                && !visited.contains(&next)
+                && (*grid.get(&next) == '#' || is_track(grid.get(&next)))
+            {
+                visited.insert(next);
+                queue.push_back((next, steps + 1));
+            }
+        }
+    }
+
+    result
 }
 
 fn calculate_time_saved(
     input: &Input,
     cheat_start: &Point,
     cheat_end: &Point,
+    cheat_length: usize,
     start_distances: &DistanceMap,
     end_distances: &DistanceMap,
     normal_path_length: usize,
@@ -96,17 +126,17 @@ fn calculate_time_saved(
 
     let path_to_start = start_distances.get_distance(cheat_start)?;
 
-    if path_to_start + 2 >= normal_path_length {
+    if path_to_start + cheat_length >= normal_path_length {
         return None;
     }
 
     let min_remaining = cheat_end.manhattan_distance(&input.end);
-    if path_to_start + 2 + min_remaining > normal_path_length - min_savings {
+    if path_to_start + cheat_length + min_remaining > normal_path_length - min_savings {
         return None;
     }
 
     let path_from_end = end_distances.get_distance(cheat_end)?;
-    let cheat_path = path_to_start + 2 + path_from_end;
+    let cheat_path = path_to_start + cheat_length + path_from_end;
 
     if cheat_path <= normal_path_length - min_savings {
         Some(normal_path_length - cheat_path)
@@ -115,8 +145,13 @@ fn calculate_time_saved(
     }
 }
 
-fn find_all_cheats(input: &Input, min_savings: usize) -> Vec<(Point, Point, usize)> {
+fn find_all_cheats(
+    input: &Input,
+    min_savings: usize,
+    max_steps: usize,
+) -> Vec<(Point, Point, usize)> {
     let mut cheats = Vec::new();
+    let mut seen_pairs = HashSet::new();
 
     // Pre-calculate distances from start and end
     let start_distances = DistanceMap::new(&input.grid, input.start);
@@ -126,6 +161,8 @@ fn find_all_cheats(input: &Input, min_savings: usize) -> Vec<(Point, Point, usiz
     let normal_path_length = start_distances
         .get_distance(&input.end)
         .unwrap_or(usize::MAX);
+
+    // Find potential starting points (track tiles next to walls)
     let potential_starts: Vec<Point> = input
         .grid
         .points()
@@ -138,25 +175,26 @@ fn find_all_cheats(input: &Input, min_savings: usize) -> Vec<(Point, Point, usiz
         .collect();
 
     for start in potential_starts {
-        for dir1 in [Direction::N, Direction::E, Direction::S, Direction::W] {
-            for dir2 in [Direction::N, Direction::E, Direction::S, Direction::W] {
-                let p1 = start.get_neighbor(&dir1);
-                let p2 = p1.get_neighbor(&dir2);
-                println!("{:?} -> {:?} -> {:?}", start, p1, p2);
+        // Find all possible paths through walls from this start point
+        let paths = find_cheat_paths(&input.grid, start, max_steps);
 
-                if is_valid_cheat(&input.grid, &p1, &p2) {
-                    if let Some(saved) = calculate_time_saved(
-                        input,
-                        &start,
-                        &p2,
-                        &start_distances,
-                        &end_distances,
-                        normal_path_length,
-                        min_savings,
-                    ) {
-                        cheats.push((start, p2, saved));
-                    }
-                }
+        for (end, steps) in paths {
+            // Only consider unique start-end pairs
+            if !seen_pairs.insert((start, end)) {
+                continue;
+            }
+
+            if let Some(saved) = calculate_time_saved(
+                input,
+                &start,
+                &end,
+                steps,
+                &start_distances,
+                &end_distances,
+                normal_path_length,
+                min_savings,
+            ) {
+                cheats.push((start, end, saved));
             }
         }
     }
@@ -164,12 +202,13 @@ fn find_all_cheats(input: &Input, min_savings: usize) -> Vec<(Point, Point, usiz
 }
 
 fn part1(input: Input) -> usize {
-    let all_cheats = find_all_cheats(&input, 100);
+    let all_cheats = find_all_cheats(&input, 100, 2);
     all_cheats.len()
 }
 
 fn part2(input: Input) -> usize {
-    0
+    let all_cheats = find_all_cheats(&input, 100, 20);
+    all_cheats.len()
 }
 
 fn main() {
