@@ -1,6 +1,6 @@
-import { existsSync, mkdirSync, writeFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const day = process.argv[2];
@@ -12,7 +12,7 @@ if (!day) {
 }
 
 const dayNum = parseInt(day, 10);
-if (isNaN(dayNum) || dayNum < 1 || dayNum > 25) {
+if (Number.isNaN(dayNum) || dayNum < 1 || dayNum > 25) {
 	console.error("Day must be a number between 1 and 25");
 	process.exit(1);
 }
@@ -40,19 +40,16 @@ export function part2(input: string): number {
 	return 0;
 }
 
-console.log("Part 1:", part1(input));
-console.log("Part 2:", part2(input));
-
 if (import.meta.vitest) {
 	const { describe, expect, it } = import.meta.vitest;
 
 	describe("Day ${dayStr}", () => {
 		it("part1 - sample", () => {
-			expect(part1(sample)).toBe(1); // TODO: update with correct answer
+			// expect(part1(sample)).toBe(1); 
 		});
 
 		it("part2 - sample", () => {
-			expect(part2(sample)).toBe(1); // TODO: update with correct answer
+			// expect(part2(sample)).toBe(1);
 		});
 	});
 }
