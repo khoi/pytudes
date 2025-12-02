@@ -27,8 +27,9 @@ if (existsSync(dayDir)) {
 
 mkdirSync(dayDir, { recursive: true });
 
-const indexTs = `import { readFileSync } from "fs";
+const indexTs = `import { readFileSync } from "node:fs";
 
+const sample = readFileSync(new URL("./sample.txt", import.meta.url), "utf-8");
 const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
 
 export function part1(input: string): number {
@@ -41,27 +42,23 @@ export function part2(input: string): number {
 
 console.log("Part 1:", part1(input));
 console.log("Part 2:", part2(input));
-`;
 
-const testTs = `import { describe, it, expect } from "vitest";
-import { readFileSync } from "fs";
-import { part1, part2 } from "./index.js";
+if (import.meta.vitest) {
+	const { describe, expect, it } = import.meta.vitest;
 
-const sample = readFileSync(new URL("./sample.txt", import.meta.url), "utf-8");
+	describe("Day ${dayStr}", () => {
+		it("part1 - sample", () => {
+			expect(part1(sample)).toBe(1); // TODO: update with correct answer
+		});
 
-describe("Day ${dayStr}", () => {
-	it("part1 - sample", () => {
-		expect(part1(sample)).toBe(0);
+		it("part2 - sample", () => {
+			expect(part2(sample)).toBe(1); // TODO: update with correct answer
+		});
 	});
-
-	it("part2 - sample", () => {
-		expect(part2(sample)).toBe(0);
-	});
-});
+}
 `;
 
 writeFileSync(join(dayDir, "index.ts"), indexTs);
-writeFileSync(join(dayDir, "index.test.ts"), testTs);
 writeFileSync(join(dayDir, "sample.txt"), "");
 writeFileSync(join(dayDir, "input.txt"), "");
 
