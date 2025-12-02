@@ -1,21 +1,31 @@
 {
-  "name": "aoc2025",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.21.0",
-  "dependencies": {
-    "@types/node": "^24.10.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.3.8"
-  }
+	"name": "aoc2025",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "",
+	"scripts": {
+		"scaffold": "tsx scripts/scaffold.ts",
+		"day": "tsx --watch",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"lint": "biome lint src",
+		"lint:fix": "biome lint --write src",
+		"format": "biome format src",
+		"format:fix": "biome format --write src",
+		"check": "biome check src",
+		"check:fix": "biome check --write src"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.21.0",
+	"dependencies": {
+		"@types/node": "^24.10.1",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.8",
+		"vitest": "^4.0.14"
+	}
 }
