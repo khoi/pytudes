@@ -5,7 +5,7 @@
 	"description": "",
 	"scripts": {
 		"scaffold": "tsx scripts/scaffold.ts",
-		"day": "tsx --watch",
+		"day": "tsx scripts/day.ts",
 		"test": "vitest",
 		"test:run": "vitest run",
 		"lint": "biome lint src",
