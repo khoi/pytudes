@@ -4,10 +4,10 @@
 	"type": "module",
 	"description": "",
 	"scripts": {
-		"scaffold": "tsx scripts/scaffold.ts",
-		"day": "tsx scripts/day.ts",
-		"test": "vitest",
-		"test:run": "vitest run",
+		"scaffold": "bun scripts/scaffold.ts",
+		"day": "bun --watch scripts/day.ts",
+		"test": "bun test --watch",
+		"test:run": "bun test",
 		"lint": "biome lint src",
 		"lint:fix": "biome lint --write src",
 		"format": "biome format src",
@@ -18,14 +18,11 @@
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
-	"packageManager": "pnpm@10.21.0",
 	"dependencies": {
-		"@types/node": "^24.10.1",
-		"tsx": "^4.21.0",
 		"typescript": "^5.9.3"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.8",
-		"vitest": "^4.0.14"
+		"@types/bun": "^1.2.5"
 	}
 }

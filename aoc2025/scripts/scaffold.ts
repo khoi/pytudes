@@ -3,11 +3,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const day = process.argv[2];
+const day = Bun.argv[2];
 
 if (!day) {
-	console.error("Usage: pnpm scaffold <day>");
-	console.error("Example: pnpm scaffold 1");
+	console.error("Usage: bun scaffold <day>");
+	console.error("Example: bun scaffold 1");
 	process.exit(1);
 }
 
@@ -40,22 +40,30 @@ export function part2(input: string): number {
 	return 0;
 }
 
-if (import.meta.vitest) {
-	const { describe, expect, it } = import.meta.vitest;
+console.log("Part 1:", part1(input));
+console.log("Part 2:", part2(input));
+`;
 
-	describe("Day ${dayStr}", () => {
-		it("part1 - sample", () => {
-			// expect(part1(sample)).toBe(1); 
-		});
+const testTs = `import { readFileSync } from "node:fs";
+import { describe, expect, it } from "bun:test";
+import { part1, part2 } from "./index.ts";
 
-		it("part2 - sample", () => {
-			// expect(part2(sample)).toBe(1);
-		});
+const sample = readFileSync(new URL("./sample.txt", import.meta.url), "utf-8");
+const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
+
+describe("Day ${dayStr}", () => {
+	it("part1", () => {
+		// expect(part1(sample)).toBe(1);
 	});
-}
+
+	it("part2", () => {
+		// expect(part2(sample)).toBe(1);
+	});
+});
 `;
 
 writeFileSync(join(dayDir, "index.ts"), indexTs);
+writeFileSync(join(dayDir, "index.test.ts"), testTs);
 writeFileSync(join(dayDir, "sample.txt"), "");
 writeFileSync(join(dayDir, "input.txt"), "");
 

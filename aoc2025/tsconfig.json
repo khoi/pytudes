@@ -6,10 +6,9 @@
 		"noEmit": true,
 		"allowImportingTsExtensions": true,
 		"verbatimModuleSyntax": true,
-
 		"strict": true,
 		"skipLibCheck": true,
 		"moduleResolution": "nodenext",
-		"types": ["vitest/importMeta"]
+		"types": ["bun-types"]
 	}
 }
