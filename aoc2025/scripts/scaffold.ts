@@ -21,8 +21,8 @@ const dayStr = dayNum.toString().padStart(2, "0");
 const dayDir = join(__dirname, "..", "src", `day${dayStr}`);
 
 if (existsSync(dayDir)) {
-	console.error(`Day ${dayStr} already exists at ${dayDir}`);
-	process.exit(1);
+	console.log(`Day ${dayStr} already exists at ${dayDir}, skipping scaffold`);
+	process.exit(0);
 }
 
 mkdirSync(dayDir, { recursive: true });
