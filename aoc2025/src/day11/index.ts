@@ -28,8 +28,38 @@ export function part1(input: string): number {
 	return dfs("you");
 }
 
-export function part2(_input: string): number {
-	return 0;
+export function part2(input: string): number {
+	const graph = parse(input);
+
+	function countPaths(from: string, to: string): number {
+		const memo = new Map<string, number>();
+
+		function dfs(node: string): number {
+			if (node === to) return 1;
+			if (memo.has(node)) return memo.get(node)!;
+
+			const total = (graph.get(node) ?? []).reduce(
+				(sum, next) => sum + dfs(next),
+				0,
+			);
+			memo.set(node, total);
+			return total;
+		}
+
+		return dfs(from);
+	}
+
+	const dacFirst =
+		countPaths("svr", "dac") *
+		countPaths("dac", "fft") *
+		countPaths("fft", "out");
+
+	const fftFirst =
+		countPaths("svr", "fft") *
+		countPaths("fft", "dac") *
+		countPaths("dac", "out");
+
+	return dacFirst + fftFirst;
 }
 
 if (import.meta.main) {
