@@ -39,3 +39,14 @@ ZZ.....RS ########
   ################`;
 	expect(part2(nested)).toBe(16);
 });
+
+test("an unreachable exit is detected even when a portal can recurse indefinitely", () => {
+	const blocked = `  ################
+AA.....PQ ########
+  ##.#############
+PQ...#############
+  ################
+ZZ.###############
+  ################`;
+	expect(() => part2(blocked)).toThrow("unreachable");
+});

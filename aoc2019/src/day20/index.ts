@@ -50,6 +50,8 @@ function shortest(input: string, recursive: boolean) {
 		links.set(b, a);
 	}
 
+	const portalPairs = links.size / 2;
+	const maxDepth = portalPairs ** 2;
 	const seen = new Set([start]);
 	let frontier = [start];
 	for (let distance = 0; frontier.length; distance++) {
@@ -73,7 +75,8 @@ function shortest(input: string, recursive: boolean) {
 			if (warp !== undefined) {
 				const destinationLevel =
 					level + (recursive ? (outer.has(pos) ? -1 : 1) : 0);
-				if (destinationLevel >= 0) enqueue(warp, destinationLevel);
+				if (destinationLevel >= 0 && destinationLevel <= maxDepth)
+					enqueue(warp, destinationLevel);
 			}
 		}
 		frontier = next;
