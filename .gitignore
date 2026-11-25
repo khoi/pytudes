@@ -1,0 +1,4 @@
+node_modules/
+/.aoc/
+/aoc*/src/day*/input.txt
+/aoc*/src/day*/input.tmp

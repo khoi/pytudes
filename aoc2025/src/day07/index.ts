@@ -1,56 +1,35 @@
-import { readFileSync } from "node:fs";
+import { run } from "../../../scripts/aoc.ts";
 
-const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
+function trace(input: string) {
+	const [top, ...rows] = input.trim().split(/\r?\n/);
+	let paths = new Map([[top.indexOf("S"), 1]]);
+	let splits = 0;
+	let timelines = 1;
 
-export function part1(input: string): number {
-	const grid = input.trim().split("\n").map(line => line.split(""));
-	const startCol = grid[0].indexOf("S");
-
-	let beams = new Set([startCol]);
-	let splitCount = 0;
-
-	for (let row = 1; row < grid.length; row++) {
-		const nextBeams = new Set<number>();
-
-		for (const col of beams) {
-			if (grid[row][col] === "^") {
-				splitCount++;
-				if (col > 0) nextBeams.add(col - 1);
-				if (col < grid[0].length - 1) nextBeams.add(col + 1);
+	for (const row of rows) {
+		const next = new Map<number, number>();
+		for (const [column, count] of paths) {
+			if (row[column] === "^") {
+				splits++;
+				timelines += count;
+				next.set(column - 1, (next.get(column - 1) ?? 0) + count);
+				next.set(column + 1, (next.get(column + 1) ?? 0) + count);
 			} else {
-				nextBeams.add(col);
+				next.set(column, (next.get(column) ?? 0) + count);
 			}
 		}
-
-		beams = nextBeams;
+		paths = next;
 	}
 
-	return splitCount;
+	return { splits, timelines };
+}
+
+export function part1(input: string): number {
+	return trace(input).splits;
 }
 
 export function part2(input: string): number {
-	const grid = input.trim().split("\n").map(line => line.split(""));
-	const startCol = grid[0].indexOf("S");
-
-	let paths = new Map([[startCol, 1]]);
-
-	for (let row = 1; row < grid.length; row++) {
-		const nextPaths = new Map<number, number>();
-
-		for (const [col, count] of paths) {
-			if (grid[row][col] === "^") {
-				if (col > 0) nextPaths.set(col - 1, (nextPaths.get(col - 1) || 0) + count);
-				if (col < grid[0].length - 1) nextPaths.set(col + 1, (nextPaths.get(col + 1) || 0) + count);
-			} else {
-				nextPaths.set(col, (nextPaths.get(col) || 0) + count);
-			}
-		}
-
-		paths = nextPaths;
-	}
-
-	return Array.from(paths.values()).reduce((sum, count) => sum + count, 0);
+	return trace(input).timelines;
 }
 
-console.log("Part 1:", part1(input));
-console.log("Part 2:", part2(input));
+if (import.meta.main) run(import.meta.url, part1, part2);

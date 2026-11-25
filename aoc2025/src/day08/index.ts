@@ -1,115 +1,74 @@
-import { readFileSync } from "node:fs";
+import { run } from "../../../scripts/aoc.ts";
 
-const sample = readFileSync(new URL("./sample.txt", import.meta.url), "utf-8");
-const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
-
-type Point3D = [number, number, number];
-
-function parseInput(input: string): Point3D[] {
-	return input
+function junctions(input: string) {
+	const points = input
 		.trim()
-		.split("\n")
-		.map((line) => line.split(",").map(Number) as Point3D);
+		.split(/\r?\n/)
+		.map((row) => row.split(",").map(Number));
+	const edges: { distance: number; a: number; b: number }[] = [];
+	for (let a = 0; a < points.length; a++) {
+		const [x, y, z] = points[a];
+		for (let b = a + 1; b < points.length; b++) {
+			const [xx, yy, zz] = points[b];
+			const distance = (x - xx) ** 2 + (y - yy) ** 2 + (z - zz) ** 2;
+			edges.push({ distance, a, b });
+		}
+	}
+	edges.sort((a, b) => a.distance - b.distance);
+	return { points, edges };
 }
 
-function distance(p1: Point3D, p2: Point3D): number {
-	return Math.sqrt(
-		(p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2 + (p2[2] - p1[2]) ** 2,
-	);
-}
+class Circuits {
+	readonly parent: number[];
+	readonly sizes: number[];
+	count: number;
 
-class UnionFind {
-	parent: number[];
-	size: number[];
-
-	constructor(n: number) {
-		this.parent = Array.from({ length: n }, (_, i) => i);
-		this.size = Array(n).fill(1);
+	constructor(boxes: number) {
+		this.parent = Array.from({ length: boxes }, (_, i) => i);
+		this.sizes = Array(boxes).fill(1);
+		this.count = boxes;
 	}
 
-	find(x: number): number {
-		if (this.parent[x] !== x) {
-			this.parent[x] = this.find(this.parent[x]);
+	private find(i: number): number {
+		while (this.parent[i] !== i) {
+			this.parent[i] = this.parent[this.parent[i]];
+			i = this.parent[i];
 		}
-		return this.parent[x];
+		return i;
 	}
 
-	union(x: number, y: number): boolean {
-		const rootX = this.find(x);
-		const rootY = this.find(y);
-
-		if (rootX === rootY) return false;
-
-		if (this.size[rootX] < this.size[rootY]) {
-			this.parent[rootX] = rootY;
-			this.size[rootY] += this.size[rootX];
-		} else {
-			this.parent[rootY] = rootX;
-			this.size[rootX] += this.size[rootY];
-		}
-
-		return true;
-	}
-
-	getCircuitSizes(): number[] {
-		const sizes = new Map<number, number>();
-		for (let i = 0; i < this.parent.length; i++) {
-			const root = this.find(i);
-			sizes.set(root, this.size[root]);
-		}
-		return Array.from(sizes.values());
+	connect(a: number, b: number): void {
+		let first = this.find(a);
+		let second = this.find(b);
+		if (first === second) return;
+		if (this.sizes[first] < this.sizes[second])
+			[first, second] = [second, first];
+		this.parent[second] = first;
+		this.sizes[first] += this.sizes[second];
+		this.sizes[second] = 0;
+		this.count--;
 	}
 }
 
-export function part1(input: string): number {
-	const points = parseInput(input);
-	const n = points.length;
-
-	const edges: { dist: number; i: number; j: number }[] = [];
-	for (let i = 0; i < n; i++) {
-		for (let j = i + 1; j < n; j++) {
-			edges.push({ dist: distance(points[i], points[j]), i, j });
-		}
-	}
-
-	edges.sort((a, b) => a.dist - b.dist);
-
-	const uf = new UnionFind(n);
-	for (let k = 0; k < 1000; k++) {
-		uf.union(edges[k].i, edges[k].j);
-	}
-
-	const sizes = uf.getCircuitSizes().sort((a, b) => b - a);
-	return sizes[0] * sizes[1] * sizes[2];
+export function part1(input: string, connections = 1000): number {
+	const { points, edges } = junctions(input);
+	const circuits = new Circuits(points.length);
+	for (const { a, b } of edges.slice(0, connections)) circuits.connect(a, b);
+	const largest = circuits.sizes
+		.filter(Boolean)
+		.sort((a, b) => b - a)
+		.slice(0, 3);
+	return largest.reduce((product, size) => product * size, 1);
 }
 
 export function part2(input: string): number {
-	const points = parseInput(input);
-	const n = points.length;
-
-	const edges: { dist: number; i: number; j: number }[] = [];
-	for (let i = 0; i < n; i++) {
-		for (let j = i + 1; j < n; j++) {
-			edges.push({ dist: distance(points[i], points[j]), i, j });
-		}
+	const { points, edges } = junctions(input);
+	const circuits = new Circuits(points.length);
+	for (const { a, b } of edges) {
+		circuits.connect(a, b);
+		if (circuits.count === 1) return points[a][0] * points[b][0];
 	}
-
-	edges.sort((a, b) => a.dist - b.dist);
-
-	const uf = new UnionFind(n);
-	let lastI = -1;
-	let lastJ = -1;
-
-	for (const edge of edges) {
-		if (uf.union(edge.i, edge.j)) {
-			lastI = edge.i;
-			lastJ = edge.j;
-			if (uf.getCircuitSizes().length === 1) break;
-		}
-	}
-
-	return points[lastI][0] * points[lastJ][0];
+	throw new Error("Expected at least two junction boxes");
 }
 
-console.log("Part 1:", part1(input));
-console.log("Part 2:", part2(input));
+if (import.meta.main) run(import.meta.url, part1, part2);

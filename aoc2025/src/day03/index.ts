@@ -1,41 +1,29 @@
-import { readFileSync } from "node:fs";
+import { run } from "../../../scripts/aoc.ts";
 
-const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
-
-function parse(input: string): number[][] {
-	return input.split("\n").map((line) => line.split("").map(Number));
-}
-
-function dp(bank: number[], k: number): number {
-	const n = bank.length;
-	let prevSuffix = new Array(n + 1).fill(-Infinity);
-	for (let i = n - 1; i >= 0; i--) {
-		prevSuffix[i] = Math.max(prevSuffix[i + 1], bank[i]);
-	}
-	for (let d = 2; d <= k; d++) {
-		const multiplier = 10 ** (d - 1);
-		const currSuffix = new Array(n + 1).fill(-Infinity);
-		for (let i = n - 1; i >= 0; i--) {
-			currSuffix[i] = Math.max(
-				currSuffix[i + 1],
-				bank[i] * multiplier + prevSuffix[i + 1],
-			);
+function totalJoltage(input: string, batteries: number): number {
+	let total = 0;
+	for (const bank of input.trim().split(/\r?\n/)) {
+		let first = 0;
+		let joltage = 0;
+		for (let remaining = batteries; remaining > 0; remaining--) {
+			let best = first;
+			for (let i = first + 1; i <= bank.length - remaining; i++) {
+				if (bank[i] > bank[best]) best = i;
+			}
+			joltage = joltage * 10 + Number(bank[best]);
+			first = best + 1;
 		}
-		prevSuffix = currSuffix;
+		total += joltage;
 	}
-
-	return prevSuffix[0];
+	return total;
 }
 
-export function part1(str: string): number {
-	const banks = parse(str);
-	return banks.reduce((sum, bank) => sum + dp(bank, 2), 0);
+export function part1(input: string): number {
+	return totalJoltage(input, 2);
 }
 
-export function part2(str: string): number {
-	const banks = parse(str);
-	return banks.reduce((sum, bank) => sum + dp(bank, 12), 0);
+export function part2(input: string): number {
+	return totalJoltage(input, 12);
 }
 
-console.log("Part 1:", part1(input));
-console.log("Part 2:", part2(input));
+if (import.meta.main) run(import.meta.url, part1, part2);

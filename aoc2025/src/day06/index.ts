@@ -1,102 +1,38 @@
-import { readFileSync } from "node:fs";
+import { run } from "../../../scripts/aoc.ts";
 
-const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
-
-function findProblems(lines: string[]) {
-	const width = Math.max(...lines.map(line => line.length));
-	const isSeparator = (col: number) =>
-		lines.every(line => !line[col] || line[col] === ' ');
-
-	const problems: { start: number, end: number }[] = [];
-	let inProblem = false;
+function total(input: string, columnwise: boolean): number {
+	const rows = input.trimEnd().split(/\r?\n/);
+	const operators = rows.pop()!;
+	const width = Math.max(operators.length, ...rows.map((row) => row.length));
+	let sum = 0;
 	let start = 0;
 
-	for (let col = 0; col < width; col++) {
-		if (!isSeparator(col) && !inProblem) {
-			inProblem = true;
-			start = col;
-		} else if (isSeparator(col) && inProblem) {
-			problems.push({ start, end: col - 1 });
-			inProblem = false;
+	for (let col = 0; col <= width; col++) {
+		if (operators[col]?.trim() || rows.some((row) => row[col]?.trim()))
+			continue;
+		if (start < col) {
+			const numbers = columnwise
+				? Array.from({ length: col - start }, (_, offset) =>
+						Number(rows.map((row) => row[start + offset]?.trim()).join("")),
+					)
+				: rows.map((row) => Number(row.slice(start, col)));
+			const op = operators.slice(start, col).trim();
+			sum +=
+				op === "+"
+					? numbers.reduce((a, b) => a + b)
+					: numbers.reduce((a, b) => a * b);
 		}
+		start = col + 1;
 	}
-
-	if (inProblem) {
-		problems.push({ start, end: width - 1 });
-	}
-
-	return problems;
-}
-
-function findOperator(operatorLine: string, start: number, end: number) {
-	for (let col = start; col <= end; col++) {
-		if (operatorLine[col] === '+' || operatorLine[col] === '*') {
-			return operatorLine[col];
-		}
-	}
-	return '+';
-}
-
-function calculate(numbers: number[], operator: string) {
-	return numbers.reduce((acc, n) => operator === '+' ? acc + n : acc * n);
+	return sum;
 }
 
 export function part1(input: string): number {
-	const lines = input.trim().split("\n");
-	const problems = findProblems(lines);
-	const operatorLine = lines[lines.length - 1];
-	const numberLines = lines.slice(0, -1);
-
-	let total = 0;
-	for (const { start, end } of problems) {
-		const operator = findOperator(operatorLine, start, end);
-		const numbers: number[] = [];
-
-		for (const line of numberLines) {
-			const region = line.substring(start, end + 1);
-			const matches = region.match(/\d+/g);
-			if (matches) {
-				numbers.push(...matches.map(Number));
-			}
-		}
-
-		if (numbers.length > 0) {
-			total += calculate(numbers, operator);
-		}
-	}
-
-	return total;
+	return total(input, false);
 }
 
 export function part2(input: string): number {
-	const lines = input.trim().split("\n");
-	const problems = findProblems(lines);
-	const operatorLine = lines[lines.length - 1];
-	const numberLines = lines.slice(0, -1);
-
-	let total = 0;
-	for (const { start, end } of problems) {
-		const operator = findOperator(operatorLine, start, end);
-		const numbers: number[] = [];
-
-		for (let col = end; col >= start; col--) {
-			const digits = numberLines
-				.map(line => line[col])
-				.filter(char => char >= '0' && char <= '9')
-				.join('');
-
-			if (digits) {
-				numbers.push(parseInt(digits));
-			}
-		}
-
-		if (numbers.length > 0) {
-			total += calculate(numbers, operator);
-		}
-	}
-
-	return total;
+	return total(input, true);
 }
 
-console.log("Part 1:", part1(input));
-console.log("Part 2:", part2(input));
+if (import.meta.main) run(import.meta.url, part1, part2);

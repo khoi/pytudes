@@ -1,45 +1,34 @@
-import { readFileSync } from "node:fs";
+import { run } from "../../../scripts/aoc.ts";
 
-const sample = readFileSync(new URL("./sample.txt", import.meta.url), "utf-8");
-const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
-
-export function part1(input: string): number {
-	const [rangesSection, idsSection] = input.trim().split("\n\n");
-
-	const ranges = rangesSection.split("\n").map(line => {
+function parse(input: string) {
+	const [fresh, available = ""] = input.trim().split(/\r?\n\r?\n/);
+	const ranges = fresh.split(/\r?\n/).map((line) => {
 		const [start, end] = line.split("-").map(Number);
 		return { start, end };
 	});
+	const ids = available.split(/\r?\n/).filter(Boolean).map(Number);
+	return { ranges, ids };
+}
 
-	const availableIds = idsSection.split("\n").map(Number);
-
-	return availableIds.filter(id =>
-		ranges.some(range => id >= range.start && id <= range.end)
+export function part1(input: string): number {
+	const { ranges, ids } = parse(input);
+	return ids.filter((id) =>
+		ranges.some(({ start, end }) => start <= id && id <= end),
 	).length;
 }
 
 export function part2(input: string): number {
-	const [rangesSection] = input.trim().split("\n\n");
-
-	const ranges = rangesSection.split("\n").map(line => {
-		const [start, end] = line.split("-").map(Number);
-		return { start, end };
-	});
-
+	const { ranges } = parse(input);
 	ranges.sort((a, b) => a.start - b.start);
-
-	const merged: { start: number; end: number }[] = [];
-	for (const range of ranges) {
-		const last = merged[merged.length - 1];
-		if (!last || range.start > last.end + 1) {
-			merged.push(range);
-		} else {
-			last.end = Math.max(last.end, range.end);
-		}
+	let total = 0;
+	let previousEnd = -1;
+	for (const { start, end } of ranges) {
+		const uncovered = Math.max(start, previousEnd + 1);
+		if (uncovered > end) continue;
+		total += end - uncovered + 1;
+		previousEnd = end;
 	}
-
-	return merged.reduce((sum, range) => sum + range.end - range.start + 1, 0);
+	return total;
 }
 
-console.log("Part 1:", part1(input));
-console.log("Part 2:", part2(input));
+if (import.meta.main) run(import.meta.url, part1, part2);

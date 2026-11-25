@@ -1,0 +1,4 @@
+{
+	"extends": "./aoc2025/tsconfig.json",
+	"include": ["scripts/**/*.ts", "aoc*/src/**/*.ts"]
+}

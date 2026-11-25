@@ -7,6 +7,7 @@ const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
 
 describe("Day 03", () => {
 	it("part1", () => {
+		expect(part1("312\r\n")).toBe(32);
 		expect(part1(sample)).toBe(357);
 		expect(part1(input)).toBe(17321);
 	});

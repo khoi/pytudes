@@ -8,9 +8,11 @@ const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
 describe("Day 09", () => {
 	it("part1", () => {
 		expect(part1(sample)).toBe(50);
+		expect(part1(input)).toBe(4735268538);
 	});
 
 	it("part2", () => {
 		expect(part2(sample)).toBe(24);
+		expect(part2(input)).toBe(1537458069);
 	});
 });

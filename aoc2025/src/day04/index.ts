@@ -1,65 +1,42 @@
-import { readFileSync } from "node:fs";
+import { run } from "../../../scripts/aoc.ts";
 
-const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
-
-function countAdjacentRolls(grid: string[][], row: number, col: number): number {
-	let count = 0;
-	for (let dr = -1; dr <= 1; dr++) {
-		for (let dc = -1; dc <= 1; dc++) {
-			if (dr === 0 && dc === 0) continue;
-			const r = row + dr;
-			const c = col + dc;
-			if (r >= 0 && r < grid.length && c >= 0 && c < grid[0].length && grid[r][c] === '@') {
-				count++;
+function removableRolls(grid: string[][]): [number, number][] {
+	const removable: [number, number][] = [];
+	for (const [row, line] of grid.entries()) {
+		for (const [col, cell] of line.entries()) {
+			if (cell !== "@") continue;
+			let neighbors = 0;
+			for (let dr = -1; dr <= 1; dr++) {
+				for (let dc = -1; dc <= 1; dc++) {
+					if ((dr || dc) && grid[row + dr]?.[col + dc] === "@") neighbors++;
+				}
 			}
+			if (neighbors < 4) removable.push([row, col]);
 		}
 	}
-	return count;
+	return removable;
+}
+
+function parse(input: string): string[][] {
+	return input
+		.trim()
+		.split(/\r?\n/)
+		.map((line) => [...line]);
 }
 
 export function part1(input: string): number {
-	const grid = input.trim().split('\n').map(line => line.split(''));
-	let count = 0;
-
-	for (let row = 0; row < grid.length; row++) {
-		for (let col = 0; col < grid[0].length; col++) {
-			if (grid[row][col] === '@' && countAdjacentRolls(grid, row, col) < 4) {
-				count++;
-			}
-		}
-	}
-
-	return count;
+	return removableRolls(parse(input)).length;
 }
 
 export function part2(input: string): number {
-	const grid = input.trim().split('\n').map(line => line.split(''));
-	let totalRemoved = 0;
-
-	while (true) {
-		const toRemove: [number, number][] = [];
-
-		for (let row = 0; row < grid.length; row++) {
-			for (let col = 0; col < grid[0].length; col++) {
-				if (grid[row][col] === '@' && countAdjacentRolls(grid, row, col) < 4) {
-					toRemove.push([row, col]);
-				}
-			}
-		}
-
-		if (toRemove.length === 0) break;
-
-		for (const [row, col] of toRemove) {
-			grid[row][col] = '.';
-		}
-
-		totalRemoved += toRemove.length;
+	const grid = parse(input);
+	let total = 0;
+	for (;;) {
+		const rolls = removableRolls(grid);
+		if (rolls.length === 0) return total;
+		for (const [row, col] of rolls) grid[row][col] = ".";
+		total += rolls.length;
 	}
-
-	return totalRemoved;
 }
 
-if (import.meta.main) {
-	console.log("Part 1:", part1(input));
-	console.log("Part 2:", part2(input));
-}
+if (import.meta.main) run(import.meta.url, part1, part2);

@@ -1,0 +1,15 @@
+{
+	"name": "pytudes",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"answers": "bun scripts/answers.ts",
+		"day": "bun scripts/day.ts",
+		"test": "bun test",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.2.5",
+		"typescript": "^5.9.3"
+	}
+}
