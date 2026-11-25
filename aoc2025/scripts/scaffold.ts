@@ -27,38 +27,24 @@ if (existsSync(dayDir)) {
 
 mkdirSync(dayDir, { recursive: true });
 
-const indexTs = `import { readFileSync } from "node:fs";
+const indexTs = `import { run } from "../../../scripts/aoc.ts";
 
-const sample = readFileSync(new URL("./sample.txt", import.meta.url), "utf-8");
-const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
-
-export function part1(input: string): number {
-	return 0;
+export function part1(_input: string): number {
+	throw new Error("Implement part 1");
 }
 
-export function part2(input: string): number {
-	return 0;
+export function part2(_input: string): number {
+	throw new Error("Implement part 2");
 }
 
-console.log("Part 1:", part1(input));
-console.log("Part 2:", part2(input));
+if (import.meta.main) run(import.meta.url, part1, part2);
 `;
 
-const testTs = `import { readFileSync } from "node:fs";
-import { describe, expect, it } from "bun:test";
-import { part1, part2 } from "./index.ts";
-
-const sample = readFileSync(new URL("./sample.txt", import.meta.url), "utf-8");
-const input = readFileSync(new URL("./input.txt", import.meta.url), "utf-8");
+const testTs = `import { describe, it } from "bun:test";
 
 describe("Day ${dayStr}", () => {
-	it("part1", () => {
-		// expect(part1(sample)).toBe(1);
-	});
-
-	it("part2", () => {
-		// expect(part2(sample)).toBe(1);
-	});
+	it.todo("part1");
+	it.todo("part2");
 });
 `;
 
